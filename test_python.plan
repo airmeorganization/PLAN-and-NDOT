@@ -1,0 +1,12 @@
+Create a variable called message with value "Hello PLAN!".
+Show message.
+
+python:
+    class MyClass:
+        def __init__(self, val):
+            self.val = val
+        def show(self):
+            print(f"From raw python: {self.val}")
+    
+    obj = MyClass(42)
+    obj.show()

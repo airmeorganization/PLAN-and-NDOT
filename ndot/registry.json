@@ -1,0 +1,140 @@
+{
+  "900": {
+    "name": "version",
+    "operands": ["L:major", "[L:minor]"],
+    "python": "pass"
+  },
+  "901": {
+    "name": "halt",
+    "operands": ["[L:code]"],
+    "python": "raise SystemExit({code})"
+  },
+  "610": {
+    "name": "positive integer",
+    "operands": ["D:dest", "L:value"],
+    "python": "{dest} = {value}"
+  },
+  "615": {
+    "name": "text",
+    "operands": ["D:dest", "...L:codepoints"],
+    "python": "{dest} = ''.join(chr(int(c)) for c in [{codepoints}])"
+  },
+  "802": {
+    "name": "output",
+    "operands": ["...S:values"],
+    "python": "print({values})"
+  },
+  "701": {
+    "name": "add",
+    "operands": ["D:dest", "S:a", "S:b"],
+    "python": "{dest} = rt.add({a}, {b})"
+  },
+  "507": {
+    "name": "for_range",
+    "operands": ["D:var", "S:start", "S:end"],
+    "python": "for {var} in range({start}, {end} + 1):",
+    "opens_block": true
+  },
+  "509": {
+    "name": "end block",
+    "operands": [],
+    "python": "",
+    "closes_block": true
+  },
+  "501": {
+    "name": "if",
+    "operands": ["S:cond"],
+    "python": "if {cond}:",
+    "opens_block": true
+  },
+  "510": {
+    "name": "define function",
+    "operands": ["F:id", "[L:param_count]"],
+    "python": "def f{id}({params}):",
+    "opens_block": true
+  },
+  "511": {
+    "name": "return",
+    "operands": ["[S:value]"],
+    "python": "return {value}"
+  },
+  "512": {
+    "name": "call",
+    "operands": ["D:dest", "F:id", "...S:args"],
+    "python": "{dest} = f{id}(*{args})"
+  },
+  "716": {
+    "name": "greater or equal",
+    "operands": ["D:dest", "S:a", "S:b"],
+    "python": "{dest} = {a} >= {b}"
+  },
+  "506": {
+    "name": "otherwise",
+    "operands": [],
+    "python": "else:",
+    "opens_block": true,
+    "closes_block": true
+  },
+  "520": {
+    "name": "define class",
+    "operands": ["F:id", "[F:base_id]"],
+    "python": "class c{id}({base_id}):",
+    "opens_block": true
+  },
+  "521": {
+    "name": "instantiate",
+    "operands": ["D:dest", "F:id", "...S:args"],
+    "python": "{dest} = c{id}(*{args})"
+  },
+  "631": {
+    "name": "get attribute",
+    "operands": ["D:dest", "S:obj", "S:attr"],
+    "python": "{dest} = getattr({obj}, {attr})"
+  },
+  "632": {
+    "name": "set attribute",
+    "operands": ["S:obj", "S:attr", "S:value"],
+    "python": "setattr({obj}, {attr}, {value})"
+  },
+  "530": {
+    "name": "try",
+    "operands": [],
+    "python": "try:",
+    "opens_block": true
+  },
+  "531": {
+    "name": "catch",
+    "operands": ["[C:type]", "D:err_var"],
+    "python": "except {type} as {err_var}:",
+    "opens_block": true,
+    "closes_block": true
+  },
+  "532": {
+    "name": "finally",
+    "operands": [],
+    "python": "finally:",
+    "opens_block": true,
+    "closes_block": true
+  },
+  "533": {
+    "name": "raise",
+    "operands": ["S:err"],
+    "python": "raise {err}"
+  },
+  "540": {
+    "name": "define async fn",
+    "operands": ["F:id", "[L:param_count]"],
+    "python": "async def f{id}({params}):",
+    "opens_block": true
+  },
+  "541": {
+    "name": "await",
+    "operands": ["D:dest", "S:coroutine"],
+    "python": "{dest} = await {coroutine}"
+  },
+  "550": {
+    "name": "yield",
+    "operands": ["[S:value]"],
+    "python": "yield {value}"
+  }
+}

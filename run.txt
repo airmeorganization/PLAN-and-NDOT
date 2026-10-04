@@ -1,0 +1,60 @@
+To use PLAN or N-DOT, you write your code in their respective file extensions (`.plan` or `.ndot`) and then use the command-line interface (CLI) we just built to run, check, or compile them into standard Python. 
+
+Here is a quick guide on how to use the toolchain:
+
+### 1. The PLAN CLI
+The PLAN CLI (`plan/cli.py`) gives you four main commands. From your project root, you can run:
+
+* **Execute directly (run)**
+  Runs your PLAN file natively in memory (by compiling it to Python AST behind the scenes).
+  ```bash
+  python -m plan.cli run hello.plan
+  ```
+* **Compile to Python (build)**
+  Transpiles your `.plan` source code into a `.py` file that anyone can run without needing the PLAN toolchain.
+  ```bash
+  python -m plan.cli build hello.plan -o output.py
+  ```
+* **Verify syntax (check)**
+  Checks your code for errors without executing it.
+  ```bash
+  python -m plan.cli check hello.plan
+  ```
+* **Print Python source (python)**
+  Prints the transpiled Python code directly to your terminal without saving it to a file.
+  ```bash
+  python -m plan.cli python hello.plan
+  ```
+
+### 2. The N-DOT CLI
+N-DOT shares the exact same CLI structure as PLAN, but parses numerical opcodes and validates them against `ndot/registry.json`.
+
+* **Execute directly (run)**
+  ```bash
+  python -m ndot.cli run model.ndot
+  ```
+* **Compile to Python (build)**
+  ```bash
+  python -m ndot.cli build model.ndot -o model.py
+  ```
+
+### Example Workflow
+1. **Write a PLAN script** (`example.plan`):
+   ```text
+   Create a variable called user with value "Surya".
+   Show "Welcome, " followed by user.
+   
+   python:
+       print("This is running from the Python escape hatch!")
+   ```
+2. **Run it:**
+   ```bash
+   python -m plan.cli run example.plan
+   ```
+3. **Distribute it as Python:**
+   ```bash
+   python -m plan.cli build example.plan
+   ```
+   *(This will generate an `example.py` file in the same directory that you can run with `python example.py`.)*
+
+Let me know if you'd like to try running some specific examples or if you want me to write a new script using the language!
