@@ -1,8 +1,12 @@
 # AO Languages — PLAN & N-DOT
 
-> **Status:** Specification draft v0.1. No implementation yet.
+**Status:** Experimental internal implementation for AO. The language specifications and implementation are actively evolving.
 
-Two languages that work together and share one execution backend:
+Two languages designed for AO's internal development workflow. They work together and share one execution backend:
+
+- **PLAN** is intended for AO contributors, junior developers, and non-technical team members who need to build small tools without learning full Python first.
+- **N-DOT** is intended primarily for AI systems and code generators, giving AO AI workflows a compact, structured, and validated execution language.
+- **Core developers** can use PLAN for rapid application development and Python when lower-level control is needed.
 
 | | **PLAN** | **N-DOT** |
 |---|---|---|
