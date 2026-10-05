@@ -1,0 +1,4 @@
+# Test assembly program
+900 version 1
+615 text s1 "PLAN and NDOT are fast!"
+802 output s1

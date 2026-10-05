@@ -1,0 +1,10 @@
+# N-DOT Tensor and Math Demo
+900 version 1
+610 positive_integer s1 3
+610 positive_integer s2 4
+202 vector s3 s1 s2
+802 output s3
+211 matmul s4 s3 s3
+802 output s4
+731 square_root s5 s4
+802 output s5

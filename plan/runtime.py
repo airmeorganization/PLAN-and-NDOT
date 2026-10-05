@@ -1,30 +1,68 @@
+"""PLAN Runtime Helper Module (plan_rt).
+
+This module is imported by generated Python code to provide runtime helpers
+for 1-based indexing, numeric conversion, and friendly English errors.
+"""
 import sys
 
-def to_number(s):
-    """
-    Converts a string or value to a number.
-    Returns int if it's integral, otherwise float.
-    Raises a PLAN-worded error if it fails.
-    """
-    try:
-        val = float(s)
-        if val.is_integer():
-            return int(val)
+def to_number(val, line=None):
+    """Converts a value to int if integral, otherwise float."""
+    if isinstance(val, (int, float)):
         return val
-    except ValueError:
-        raise ValueError(f"I expected a number, but got '{s}'.")
-
-def item(seq, n, line):
-    """
-    1-based indexing for PLAN collections.
-    """
-    if not isinstance(n, int):
-        raise TypeError(f"Line {line}: list index must be a whole number, not {type(n).__name__}.")
-        
     try:
-        return seq[n - 1]
+        s = str(val).strip()
+        if '.' in s:
+            f = float(s)
+            return int(f) if f.is_integer() else f
+        return int(s)
+    except ValueError:
+        prefix = f"Line {line}: " if line else ""
+        raise ValueError(f"{prefix}Cannot convert '{val}' to a number.")
+
+def to_whole_number(val, line=None):
+    """Converts a value to int."""
+    if isinstance(val, int):
+        return val
+    try:
+        return int(float(str(val).strip()))
+    except ValueError:
+        prefix = f"Line {line}: " if line else ""
+        raise ValueError(f"{prefix}Cannot convert '{val}' to a whole number.")
+
+def item(seq, n, line=None):
+    """1-based indexing for PLAN collections with English error messages."""
+    try:
+        idx = int(n)
+        if idx <= 0:
+            prefix = f"Line {line}: " if line else ""
+            raise IndexError(f"{prefix}PLAN indexing is 1-based, but received index {idx}.")
+        return seq[idx - 1]
     except IndexError:
-        count = len(seq)
-        if count == 0:
-            raise IndexError(f"Line {line}: this list is empty, so there is no item {n}.")
-        raise IndexError(f"Line {line}: there is no item {n} — it only has {count} item{'s' if count != 1 else ''}.")
+        prefix = f"Line {line}: " if line else ""
+        length = len(seq) if hasattr(seq, '__len__') else 'unknown'
+        raise IndexError(f"{prefix}there is no item {n} in sequence — it only has {length} items.")
+
+def set_item(seq, n, val, line=None):
+    """1-based index assignment."""
+    try:
+        idx = int(n)
+        if idx <= 0:
+            prefix = f"Line {line}: " if line else ""
+            raise IndexError(f"{prefix}PLAN indexing is 1-based, but received index {idx}.")
+        seq[idx - 1] = val
+    except IndexError:
+        prefix = f"Line {line}: " if line else ""
+        length = len(seq) if hasattr(seq, '__len__') else 'unknown'
+        raise IndexError(f"{prefix}cannot set item {n} — sequence only has {length} items.")
+
+def entry(mapping, key, line=None):
+    """Access dictionary entry."""
+    try:
+        return mapping[key]
+    except KeyError:
+        prefix = f"Line {line}: " if line else ""
+        raise KeyError(f"{prefix}entry '{key}' not found in dictionary.")
+
+def set_entry(mapping, key, val, line=None):
+    """Set dictionary entry."""
+    mapping[key] = val

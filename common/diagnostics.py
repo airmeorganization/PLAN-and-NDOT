@@ -43,10 +43,27 @@ class Diagnostic:
 class CompileError(Exception):
     """Raised by a compiler stage that cannot continue (carries diagnostics)."""
 
-    def __init__(self, diagnostics: list[Diagnostic] | Diagnostic):
-        if isinstance(diagnostics, Diagnostic):
-            diagnostics = [diagnostics]
-        self.diagnostics: list[Diagnostic] = list(diagnostics)
+    def __init__(self, diagnostics_or_message: list[Diagnostic] | Diagnostic | str, line: int | None = None, column: int | None = None, code: str = "P200", source_line: str | None = None):
+        if isinstance(diagnostics_or_message, str):
+            diag = Diagnostic(code=code, message=diagnostics_or_message, line=line, location=f"col {column}" if column else None, source_text=source_line)
+            self.diagnostics = [diag]
+            self.message = diagnostics_or_message
+            self.line = line
+            self.column = column
+            self.source_line = source_line
+        elif isinstance(diagnostics_or_message, Diagnostic):
+            self.diagnostics = [diagnostics_or_message]
+            self.message = diagnostics_or_message.message
+            self.line = diagnostics_or_message.line
+            self.column = None
+            self.source_line = diagnostics_or_message.source_text
+        else:
+            self.diagnostics = list(diagnostics_or_message)
+            first = self.diagnostics[0] if self.diagnostics else None
+            self.message = first.message if first else ""
+            self.line = first.line if first else None
+            self.column = None
+            self.source_line = first.source_text if first else None
         super().__init__("\n".join(d.format() for d in self.diagnostics))
 
 

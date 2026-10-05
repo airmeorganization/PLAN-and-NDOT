@@ -1,0 +1,19 @@
+Note: Testing functions, conditions, loops, collections, and phrases
+Create a function called classify that accepts number n and gives back text,
+    When n is greater than 10,
+        return "Large".
+    Otherwise when n is equal to 10,
+        return "Ten".
+    Otherwise,
+        return "Small".
+
+Create a variable called nums with value a list of 5, 10, and 20.
+For every x in nums,
+    Create a variable called cat with value call classify with x.
+    Show x followed by ": " followed by cat.
+
+Create a variable called first_val with value the first item of nums.
+Show "First item is: " followed by first_val.
+
+Create a variable called root with value square root of 64.
+Show "Square root of 64 is " followed by root.

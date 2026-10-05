@@ -1,5 +1,5 @@
-from dataclasses import dataclass
-from typing import List, Optional, Union, Any
+from dataclasses import dataclass, field
+from typing import List, Optional, Union, Any, Dict, Tuple
 
 @dataclass
 class ASTNode:
@@ -23,18 +23,36 @@ class Identifier(Expr):
 @dataclass
 class BinaryOp(Expr):
     left: Expr
-    op: str
+    op: str # '+', '-', '*', '/', '%', '**', '==', '!=', '<', '<=', '>', '>=', 'and', 'or', 'in', 'not in'
     right: Expr
 
 @dataclass
 class UnaryOp(Expr):
-    op: str
+    op: str # '-', 'not'
     operand: Expr
+
+@dataclass
+class Between(Expr):
+    expr: Expr
+    low: Expr
+    high: Expr
+    negated: bool = False
+
+@dataclass
+class IsEmpty(Expr):
+    expr: Expr
+    negated: bool = False
+
+@dataclass
+class IsNothing(Expr):
+    expr: Expr
+    negated: bool = False
 
 @dataclass
 class Call(Expr):
     callee: Expr
-    args: List[Expr]
+    args: List[Expr] = field(default_factory=list)
+    kwargs: Dict[str, Expr] = field(default_factory=dict)
 
 @dataclass
 class MemberAccess(Expr):
@@ -47,17 +65,30 @@ class Index(Expr):
     index: Expr
 
 @dataclass
+class FirstItem(Expr):
+    target: Expr
+
+@dataclass
+class LastItem(Expr):
+    target: Expr
+
+@dataclass
+class EntryIndex(Expr):
+    target: Expr
+    key: Expr
+
+@dataclass
 class ListLiteral(Expr):
-    items: List[Expr]
+    items: List[Expr] = field(default_factory=list)
 
 @dataclass
 class DictLiteral(Expr):
-    pass # Empty dict for v0.1
+    pass
 
 @dataclass
 class Phrase(Expr):
     name: str
-    args: List[Expr]
+    args: List[Expr] = field(default_factory=list)
 
 # --- Statements ---
 
@@ -84,22 +115,23 @@ class ModifyStmt(Statement):
 @dataclass
 class Show(Statement):
     exprs: List[Expr]
+    followed_by: bool = False
 
 @dataclass
 class Ask(Statement):
     prompt: Expr
     target: str
-    is_number: bool
+    kind: str = 'text' # 'text', 'number', 'whole_number'
 
 @dataclass
 class UseModule(Statement):
     module: str
-    alias: Optional[str]
+    alias: Optional[str] = None
 
 @dataclass
 class UseFromModule(Statement):
-    names: List[str]
-    module: str
+    names: List[str] = field(default_factory=list)
+    module: str = ""
 
 @dataclass
 class UseShared(Statement):
@@ -107,7 +139,7 @@ class UseShared(Statement):
 
 @dataclass
 class Return(Statement):
-    value: Optional[Expr]
+    value: Optional[Expr] = None
 
 @dataclass
 class CallStmt(Statement):
@@ -128,43 +160,49 @@ class PythonRaw(Statement):
 # --- Blocks ---
 
 @dataclass
-class Block(Statement):
+class WhenCase:
+    condition: Expr
     body: List[Statement]
 
 @dataclass
-class IfBlock(Block):
-    condition: Expr
-    else_if_blocks: List['IfBlock']
-    else_body: Optional[List[Statement]]
+class WhenBlock(Statement):
+    cases: List[WhenCase]
+    otherwise_body: Optional[List[Statement]] = None
 
 @dataclass
-class ForRange(Block):
+class ForRange(Statement):
     var_name: str
     start: Expr
     end: Expr
     step: Optional[Expr]
+    body: List[Statement]
 
 @dataclass
-class ForEach(Block):
+class ForEach(Statement):
     var_name: str
     iterable: Expr
+    body: List[Statement]
 
 @dataclass
-class WhileLoop(Block):
+class WhileLoop(Statement):
     condition: Expr
+    body: List[Statement]
 
 @dataclass
-class RepeatLoop(Block):
+class RepeatLoop(Statement):
     count: Expr
+    body: List[Statement]
 
 @dataclass
-class FunctionDef(Block):
+class FunctionDef(Statement):
     name: str
-    params: List[tuple[Optional[str], str]] # type, name
+    params: List[Tuple[Optional[str], str]] # (type, name)
     return_type: Optional[str]
+    body: List[Statement]
 
 @dataclass
-class TryBlock(Block):
+class TryBlock(Statement):
+    try_body: List[Statement]
     failure_name: Optional[str]
     failure_body: List[Statement]
 

@@ -1,0 +1,25 @@
+Note: Testing while, repeat, try/on-failure, mutators, and expressions
+Create a variable called count with value 1.
+While count is less than 4,
+    Show "Count is: " followed by count.
+    Increase count by 1.
+
+Repeat 2 times,
+    Show "Repeating...".
+
+Create a variable called items with value an empty list.
+Append "apple" to items.
+Append "banana" to items.
+Show "Items list: " followed by items.
+
+Create a variable called val with value 2 to the power of 4.
+Show "2^4 is " followed by val.
+
+When val is between 10 and 20,
+    Show "val is between 10 and 20!".
+
+Try,
+    Create a variable called div with value 10 divided by 2.
+    Show "10 / 2 = " followed by div.
+On failure,
+    Show "Math error occurred.".
