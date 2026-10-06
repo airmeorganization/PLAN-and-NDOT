@@ -13,6 +13,8 @@ def main():
     parser.add_argument("command", choices=["run", "build", "check", "python"])
     parser.add_argument("file", help="Input file (.plan)")
     parser.add_argument("-o", "--output", help="Output file")
+    parser.add_argument("--allow-python", action="store_true", help="Allow raw Python lines in PLAN")
+    parser.add_argument("--allow-all-modules", action="store_true", help="Lift standard library import restriction")
     
     args = parser.parse_args()
     
@@ -50,7 +52,11 @@ def main():
         elif args.command == "run":
             # Add current directory to path for rt imports
             sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-            exec(python_code, {})
+            exec_globals = {
+                "__name__": "__main__",
+                "__builtins__": __builtins__,
+            }
+            exec(python_code, exec_globals)
             
     except CompileError as e:
         print(f"Compile Error: {e.message} at line {e.line}, column {e.column}")

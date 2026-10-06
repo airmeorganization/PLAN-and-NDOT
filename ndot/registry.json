@@ -11,7 +11,8 @@
     "name": "load model",
     "domain": "models",
     "operands": ["D:dest", "S:path"],
-    "python": "{dest} = rt.load_model({path})"
+    "python": "{dest} = rt.load_model({path})",
+    "permissions": ["files"]
   },
   "103": {
     "path": "1.0.3",
@@ -39,7 +40,8 @@
     "name": "save model",
     "domain": "models",
     "operands": ["S:model", "S:path"],
-    "python": "{model}.save({path})"
+    "python": "{model}.save({path})",
+    "permissions": ["files"]
   },
   "107": {
     "path": "1.0.7",
@@ -224,7 +226,8 @@
     "name": "load CSV",
     "domain": "datasets",
     "operands": ["D:dest", "S:path"],
-    "python": "{dest} = rt.load_csv({path})"
+    "python": "{dest} = rt.load_csv({path})",
+    "permissions": ["files"]
   },
   "407": {
     "path": "4.0.7",
@@ -700,21 +703,24 @@
     "name": "read file",
     "domain": "io",
     "operands": ["D:dest", "S:path"],
-    "python": "{dest} = rt.read_file({path})"
+    "python": "{dest} = rt.read_file({path})",
+    "permissions": ["files"]
   },
   "804": {
     "path": "8.0.4",
     "name": "network fetch",
     "domain": "io",
     "operands": ["D:dest", "S:url"],
-    "python": "{dest} = rt.fetch({url})"
+    "python": "{dest} = rt.fetch({url})",
+    "permissions": ["network"]
   },
   "805": {
     "path": "8.0.5",
     "name": "write file",
     "domain": "io",
     "operands": ["S:path", "S:value"],
-    "python": "rt.write_file({path}, {value})"
+    "python": "rt.write_file({path}, {value})",
+    "permissions": ["files"]
   },
 
   "900": {

@@ -11,6 +11,32 @@ import urllib.request
 import builtins
 from typing import List, Tuple, Union, Optional, Any
 
+try:
+    from common.sandbox import Permissions
+except ImportError:
+    from dataclasses import dataclass
+    @dataclass
+    class Permissions:
+        files: bool = False
+        network: bool = False
+
+_ACTIVE_PERMISSIONS = Permissions(files=False, network=False)
+
+def set_permissions(allow_files: bool = False, allow_network: bool = False) -> None:
+    global _ACTIVE_PERMISSIONS
+    _ACTIVE_PERMISSIONS = Permissions(files=allow_files, network=allow_network)
+
+def get_permissions() -> Permissions:
+    return _ACTIVE_PERMISSIONS
+
+def _check_files_permission(op_name: str = "file operation") -> None:
+    if not _ACTIVE_PERMISSIONS.files:
+        raise RuntimeError(f"N303: Permission denied: {op_name} requires --allow-files flag")
+
+def _check_network_permission(op_name: str = "network operation") -> None:
+    if not _ACTIVE_PERMISSIONS.network:
+        raise RuntimeError(f"N303: Permission denied: {op_name} requires --allow-network flag")
+
 # Persistent storage for 602/603
 _PERSISTENT_MEMORY = {}
 
@@ -395,6 +421,7 @@ class Dataset:
         return d1, d2
 
 def load_csv(path: str) -> Dataset:
+    _check_files_permission("load CSV (406)")
     xs = []
     ys = []
     with open(path, 'r', encoding='utf-8') as f:
@@ -449,6 +476,7 @@ class LinearRegression:
         return [self.W, self.b]
 
     def save(self, path: str):
+        _check_files_permission("save model (106)")
         with open(path, 'w', encoding='utf-8') as f:
             json.dump({'arch': 1, 'in': self.in_features, 'out': self.out_features, 'W': self.W.tolist(), 'b': self.b.tolist()}, f)
 
@@ -488,6 +516,7 @@ class LogisticRegression:
         return [self.W, self.b]
 
     def save(self, path: str):
+        _check_files_permission("save model (106)")
         with open(path, 'w', encoding='utf-8') as f:
             json.dump({'arch': 2, 'in': self.in_features, 'W': self.W.tolist(), 'b': self.b.tolist()}, f)
 
@@ -530,6 +559,7 @@ class MLP:
         return self.weights + self.biases
 
     def save(self, path: str):
+        _check_files_permission("save model (106)")
         with open(path, 'w', encoding='utf-8') as f:
             data = {
                 'arch': 3,
@@ -549,6 +579,7 @@ def create_model(arch: int, *sizes: int) -> Any:
     raise ValueError(f"Unknown architecture code: {arch}")
 
 def load_model(path: str) -> Any:
+    _check_files_permission("load model (102)")
     with open(path, 'r', encoding='utf-8') as f:
         data = json.load(f)
     arch = data.get('arch', 1)
@@ -676,14 +707,17 @@ def mem_store(key: Any, val: Any):
     _PERSISTENT_MEMORY[key] = val
 
 def read_file(path: str) -> str:
+    _check_files_permission("read file (803)")
     with open(path, 'r', encoding='utf-8') as f:
         return f.read()
 
 def write_file(path: str, val: Any):
+    _check_files_permission("write file (805)")
     with open(path, 'w', encoding='utf-8') as f:
         f.write(str(val))
 
 def fetch(url: str) -> str:
+    _check_network_permission("network fetch (804)")
     with urllib.request.urlopen(url) as response:
         return response.read().decode('utf-8')
 

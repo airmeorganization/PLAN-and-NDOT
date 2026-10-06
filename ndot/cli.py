@@ -13,6 +13,8 @@ def main():
     parser.add_argument("command", choices=["run", "build", "check", "dis", "asm"])
     parser.add_argument("file", help="Input file (.ndot or .ndasm)")
     parser.add_argument("-o", "--output", help="Output file")
+    parser.add_argument("--allow-files", action="store_true", help="Allow file operations (803, 805, 406, 102, 106)")
+    parser.add_argument("--allow-network", action="store_true", help="Allow network fetch operations (804)")
 
     args = parser.parse_args()
     registry = Registry()
@@ -57,7 +59,20 @@ def main():
 
         elif args.command == "run":
             sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-            exec(python_code, {})
+            from ndot import ndot_runtime as rt
+            rt.set_permissions(allow_files=args.allow_files, allow_network=args.allow_network)
+            exec_globals = {
+                "__name__": "__main__",
+                "__builtins__": __builtins__,
+                "rt": rt,
+            }
+            try:
+                exec(python_code, exec_globals)
+            except RuntimeError as err:
+                if "N303" in str(err):
+                    print(f"Runtime Error: {err}")
+                    sys.exit(1)
+                raise
 
     except CompileError as e:
         print(f"Compile Error: {e}")

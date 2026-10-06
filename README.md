@@ -64,7 +64,9 @@ ndot dis    model.ndot          # numeric source → readable mnemonic listing
 ndot asm    model.ndasm         # mnemonic listing → numeric source (debug aid)
 ```
 
-## 3. Planned repository layout
+## 3. Repository layout
+
+### 3.1 Active v0.1 implementation tree
 
 ```text
 ao-languages/
@@ -72,29 +74,36 @@ ao-languages/
 │   ├── lexer.py          # sentences, strings, numbers, indentation
 │   ├── parser.py         # controlled-English grammar → AST
 │   ├── ast_nodes.py      # dataclasses
-│   ├── semantic.py       # scopes, name resolution, English diagnostics
+│   ├── semantic.py       # scopes, name resolution, English diagnostics (P301–P308)
 │   ├── phrases.py        # phrase library ("square root of" → math.sqrt)
 │   ├── python_codegen.py # PLAN AST → Python ast
-│   ├── runtime.py        # tiny helper module used by generated code
-│   └── cli.py
+│   ├── runtime.py        # helper module used by generated code
+│   └── cli.py            # run, build, check, python
 ├── ndot/
-│   ├── lexer.py          # digit/dot validation, segmentation, grouping
-│   ├── registry.json     # normative opcode table (generated from spec)
-│   ├── registry.py
-│   ├── ir.py             # instruction + block tree
-│   ├── validator.py      # arity, blocks, slot-use analysis
-│   ├── optimizer.py      # (v0.2)
-│   ├── python_backend.py
-│   ├── ndot_runtime.py   # pure-Python tensors, models, datasets
-│   └── cli.py
+│   ├── lexer.py          # digit/dot validation (N101–N104)
+│   ├── registry.json     # normative opcode table with permissions
+│   ├── registry.py       # opcode lookup & definitions
+│   ├── validator.py      # arity, enums, blocks, slots, dataflow (N201–N209)
+│   ├── disasm.py         # disassembler & assembler (.ndasm ↔ .ndot)
+│   ├── python_backend.py # N-DOT instructions → Python code
+│   ├── ndot_runtime.py   # pure-Python tensors, models, datasets, sandbox gate (N301–N303)
+│   └── cli.py            # run, build, check, dis, asm (--allow-files, --allow-network)
 ├── common/
-│   ├── sourcemap.py      # Python line → PLAN sentence / N-DOT instruction
-│   ├── sandbox.py        # import allow-list, file/network permissions
-│   └── loader.py
+│   ├── diagnostics.py    # shared Diagnostic and CompileError reporting
+│   ├── sourcemap.py      # line mapping
+│   └── sandbox.py        # sandbox permissions & module allow-lists
 └── spec/
-    ├── PLAN.md
-    └── NDOT.md
+    ├── PLAN.md           # PLAN language specification
+    └── NDOT.md           # N-DOT specification
 ```
+
+### 3.2 Roadmap components (Planned for v0.2+)
+
+The following modules are designed as part of future milestones:
+- `ndot/ir.py`: Multi-level intermediate representation with block tree (v0.2)
+- `ndot/optimizer.py`: Constant folding, dead-slot elimination, loop invariant motion (v0.2)
+- `common/loader.py`: Unified multi-language dynamic module loader (v0.2)
+
 
 ---
 
