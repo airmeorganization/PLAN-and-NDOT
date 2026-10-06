@@ -97,13 +97,19 @@ class Lexer:
                 i = end_idx
                 continue
 
-            # Number: Decimal (e.g. 3.14) or Integer (e.g. 19)
+            # Number: Decimal (e.g. 3.14) or Integer (e.g. 19), with optional leading minus sign
             # Note: 5. followed by space or EOF must be Integer(5) then Period(.)
-            num_match = re.match(r'^(\d+\.\d+|\d+)', prefix)
+            num_match = re.match(r'^-?(\d+\.\d+|\d+)', prefix)
             if num_match:
-                num_str = num_match.group(1)
+                num_str = num_match.group(0)
                 tokens.append(Token('NUMBER', num_str, line_num, col, line_indent, num_str))
                 i += len(num_str)
+                continue
+
+            # Minus sign / dash
+            if ch == '-':
+                tokens.append(Token('MINUS', '-', line_num, col, line_indent, '-'))
+                i += 1
                 continue
 
             # Comma

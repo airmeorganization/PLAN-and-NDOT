@@ -4,6 +4,7 @@ import argparse
 import ast as pyast
 from plan.lexer import Lexer
 from plan.parser import Parser
+from plan.semantic import SemanticAnalyzer
 from plan.python_codegen import Codegen
 from common.diagnostics import CompileError
 
@@ -24,6 +25,9 @@ def main():
         
         parser = Parser(tokens)
         ast = parser.parse_program()
+        
+        analyzer = SemanticAnalyzer()
+        analyzer.analyze(ast)
         
         if args.command == "check":
             print("Check passed.")

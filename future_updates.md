@@ -17,7 +17,8 @@ The codebase has now bridged the gap from initial prototype to a fully functiona
      - Error handling (`Try... On failure...`)
      - Input/Output (`Show...`, `Ask... and store the answer in...`)
      - Module imports (`Use the X module...`, `Use A and B from the C module...`)
-   - **Python Codegen:** Emits standard Python AST preserving source line numbers.
+   - **Semantic Analyzer (`plan/semantic.py`):** Scope resolution, declaration validation (use-before-create, duplicate definitions, loop/function context checks), hoisted function arity validation, and English diagnostics with 'did you mean' suggestions.
+   - **Python Codegen:** Emits standard Python AST with native type annotations (`float`, `int`, `str`, `list`, `dict`, `bool`) and sign-aware inclusive range adjustments, preserving source line numbers.
    - **Toolchain:** `plan run`, `plan build`, `plan check`, `plan python`.
 
 2. **N-DOT (`ndot/`):**

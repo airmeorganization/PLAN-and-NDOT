@@ -527,9 +527,11 @@ print(s24)
 
 ---
 
-## 11. Advanced Python Parity (Full Coverage)
+## 11. Reserved / Experimental Parity Extensions (Roadmap v0.2+)
 
-To ensure N-DOT can map to **all** Python syntax, the following opcodes are included in the core:
+> **Design Boundary Note:** The normative **Core v0.1** instruction set is strictly defined in **Section 5** (opcodes `100–999` across models, tensors, neural ops, datasets, control flow, memory, math, I/O, and system). This core instruction set is operationalized in the v0.1 toolchain and runtime.
+>
+> The opcodes listed below in this section are **Reserved / Experimental Parity Extensions** planned for future milestones (v0.2+). They define candidate opcode mappings for Python OOP, full exceptions, async/await, and generators, but are **not** part of the production-ready Core v0.1 runtime or the default validation tables.
 
 ### 11.1 Objects and Classes (OOP)
 | Op | Name | Signature | Python |

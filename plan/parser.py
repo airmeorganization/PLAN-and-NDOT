@@ -180,9 +180,14 @@ class Parser:
                 while True:
                     if self.peek().value == 'and' and self.peek_next().value == 'gives':
                         break
-                    if self.match('COMMA'):
-                        if self.peek().value == 'and' and self.peek_next().value == 'gives':
+                    if self.peek().type == 'COMMA':
+                        next_tok = self.peek_next()
+                        if next_tok.value == 'and' and self.pos + 2 < len(self.tokens) and self.tokens[self.pos + 2].value == 'gives':
                             break
+                        # If next token is on next line, comma is header delimiter
+                        if next_tok.line != self.peek().line or next_tok.value in ('gives', 'return', 'when', 'if', 'show', 'let', 'create', 'set'):
+                            break
+                        self.next_token() # consume COMMA
                         self.match_word('and')
                         params.append(self.parse_param())
                     elif self.match_word('and'):
@@ -578,7 +583,7 @@ class Parser:
             if self.match_word('plus'):
                 right = self.parse_multiplicative(allow_times=allow_times)
                 left = BinaryOp(line=left.line, column=left.column, left=left, op='+', right=right)
-            elif self.match_word('minus'):
+            elif self.match_word('minus') or self.match('MINUS'):
                 right = self.parse_multiplicative(allow_times=allow_times)
                 left = BinaryOp(line=left.line, column=left.column, left=left, op='-', right=right)
             else:
@@ -609,7 +614,7 @@ class Parser:
         return left
 
     def parse_unary(self) -> Expr:
-        if self.match_word('negative'):
+        if self.match_word('negative') or self.match('MINUS'):
             tok = self.tokens[self.pos - 1]
             opnd = self.parse_unary()
             return UnaryOp(line=tok.line, column=tok.column, op='-', operand=opnd)

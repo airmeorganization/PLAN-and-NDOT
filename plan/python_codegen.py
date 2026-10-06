@@ -1,7 +1,30 @@
 import ast as pyast
-from typing import List, Set, Any
+from typing import List, Set, Any, Optional
 from plan.ast_nodes import *
 from plan.phrases import PHRASE_REGISTRY
+
+PLAN_TO_PYTHON_TYPES = {
+    'number': 'float',
+    'float': 'float',
+    'whole number': 'int',
+    'whole_number': 'int',
+    'int': 'int',
+    'text': 'str',
+    'str': 'str',
+    'string': 'str',
+    'list': 'list',
+    'dictionary': 'dict',
+    'dict': 'dict',
+    'flag': 'bool',
+    'bool': 'bool',
+    'boolean': 'bool',
+}
+
+def to_python_type(type_name: Optional[str]) -> Optional[str]:
+    if not type_name:
+        return None
+    cleaned = type_name.strip().lower()
+    return PLAN_TO_PYTHON_TYPES.get(cleaned, cleaned)
 
 class Codegen:
     """PLAN to Python AST Generator."""
@@ -234,21 +257,48 @@ class Codegen:
         start = self.visit_expr(node.start)
         end = self.visit_expr(node.end)
 
-        # PLAN bounds are inclusive: range(start, end + 1)
-        # If step is provided: range(start, end + (1 if step > 0 else -1), step)
+        # PLAN bounds are inclusive: adjusted by the step's sign (spec §6.1)
         if node.step:
             step = self.visit_expr(node.step)
-            # We construct range(start, end + 1, step)
-            end_plus_1 = pyast.BinOp(left=end, op=pyast.Add(), right=pyast.Constant(value=1), lineno=node.line, col_offset=node.column)
+            is_statically_negative = False
+            is_statically_positive = False
+
+            if isinstance(node.step, Literal) and isinstance(node.step.value, (int, float)):
+                if node.step.value < 0:
+                    is_statically_negative = True
+                elif node.step.value > 0:
+                    is_statically_positive = True
+            elif isinstance(node.step, UnaryOp) and node.step.op == '-':
+                if isinstance(node.step.operand, Literal) and isinstance(node.step.operand.value, (int, float)):
+                    if node.step.operand.value > 0:
+                        is_statically_negative = True
+
+            if is_statically_negative:
+                # 10 to 1 in steps of -1 -> range(10, 1 - 1, -1)
+                adj_end = pyast.BinOp(left=end, op=pyast.Sub(), right=pyast.Constant(value=1), lineno=node.line, col_offset=node.column)
+            elif is_statically_positive:
+                # 1 to 10 in steps of 2 -> range(1, 10 + 1, 2)
+                adj_end = pyast.BinOp(left=end, op=pyast.Add(), right=pyast.Constant(value=1), lineno=node.line, col_offset=node.column)
+            else:
+                # Dynamic step: end + (1 if step > 0 else -1)
+                step_sign = pyast.IfExp(
+                    test=pyast.Compare(left=step, ops=[pyast.Gt()], comparators=[pyast.Constant(value=0)], lineno=node.line, col_offset=node.column),
+                    body=pyast.Constant(value=1),
+                    orelse=pyast.Constant(value=-1),
+                    lineno=node.line, col_offset=node.column
+                )
+                adj_end = pyast.BinOp(left=end, op=pyast.Add(), right=step_sign, lineno=node.line, col_offset=node.column)
+
             range_call = pyast.Call(
                 func=pyast.Name(id='range', ctx=pyast.Load(), lineno=node.line, col_offset=node.column),
-                args=[start, end_plus_1, step], keywords=[], lineno=node.line, col_offset=node.column
+                args=[start, adj_end, step], keywords=[], lineno=node.line, col_offset=node.column
             )
         else:
-            end_plus_1 = pyast.BinOp(left=end, op=pyast.Add(), right=pyast.Constant(value=1), lineno=node.line, col_offset=node.column)
+            # Default step is +1: range(start, end + 1)
+            adj_end = pyast.BinOp(left=end, op=pyast.Add(), right=pyast.Constant(value=1), lineno=node.line, col_offset=node.column)
             range_call = pyast.Call(
                 func=pyast.Name(id='range', ctx=pyast.Load(), lineno=node.line, col_offset=node.column),
-                args=[start, end_plus_1], keywords=[], lineno=node.line, col_offset=node.column
+                args=[start, adj_end], keywords=[], lineno=node.line, col_offset=node.column
             )
 
         body = [self.visit_stmt(s) for s in node.body] or [pyast.Pass()]
@@ -278,14 +328,16 @@ class Codegen:
     def visit_FunctionDef(self, node: FunctionDef) -> pyast.stmt:
         args = []
         for param_type, param_name in node.params:
-            ann = pyast.Name(id=param_type, ctx=pyast.Load()) if param_type else None
+            py_type = to_python_type(param_type)
+            ann = pyast.Name(id=py_type, ctx=pyast.Load(), lineno=node.line, col_offset=node.column) if py_type else None
             args.append(pyast.arg(arg=param_name, annotation=ann, lineno=node.line, col_offset=node.column))
 
         arguments = pyast.arguments(
             posonlyargs=[], args=args, vararg=None, kwonlyargs=[],
             kw_defaults=[], kwarg=None, defaults=[]
         )
-        ret_ann = pyast.Name(id=node.return_type, ctx=pyast.Load()) if node.return_type else None
+        py_ret_type = to_python_type(node.return_type)
+        ret_ann = pyast.Name(id=py_ret_type, ctx=pyast.Load(), lineno=node.line, col_offset=node.column) if py_ret_type else None
         body = [self.visit_stmt(s) for s in node.body] or [pyast.Pass()]
         return pyast.FunctionDef(
             name=node.name, args=arguments, body=body, decorator_list=[],

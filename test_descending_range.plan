@@ -1,0 +1,5 @@
+Create a function called calculate that accepts whole number a and number b and gives back number,
+    return a plus b.
+
+For every n from 10 to 1 in steps of -1,
+    Show "n is: " followed by n.

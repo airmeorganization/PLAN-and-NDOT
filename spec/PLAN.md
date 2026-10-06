@@ -494,9 +494,11 @@ for _plan_i in range(3):
 print("Total: ", total, sep="")
 ```
 
-## 14. Advanced Python Features (Full Coverage)
+## 14. Advanced Python Features (Roadmap v0.2+ Parity)
 
-PLAN covers 100% of Python's capabilities natively:
+> **Design Boundary Note:** The **Core v0.1** specification covers statements, blocks, conditions, loops, functions, collections, indexing, phrase libraries, and exceptions as detailed in Sections 1–13.
+>
+> The patterns documented below define the native grammar designs for advanced Python parity (OOP classes, async/await, generators, comprehensions, decorators, context managers) slated for native compiler implementation in **v0.2+**. For v0.1 workflows requiring these features, developers can use the `python:` block (§15).
 
 ### 14.1 Classes and Objects
 ```text
