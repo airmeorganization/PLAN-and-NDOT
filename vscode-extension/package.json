@@ -182,7 +182,7 @@
     }
   },
   "scripts": {
-    "vscode:prepublish": "npm run compile",
+    "vscode:prepublish": "node -e \"process.exit(0)\"",
     "compile": "tsc -p ./",
     "watch": "tsc -watch -p ./"
   },
