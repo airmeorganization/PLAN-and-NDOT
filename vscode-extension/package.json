@@ -24,7 +24,16 @@
   "activationEvents": [
     "onLanguage:plan",
     "onLanguage:ndot",
-    "onLanguage:ndasm"
+    "onLanguage:ndasm",
+    "onCommand:plan.run",
+    "onCommand:plan.build",
+    "onCommand:plan.check",
+    "onCommand:plan.toPython",
+    "onCommand:ndot.run",
+    "onCommand:ndot.build",
+    "onCommand:ndot.check",
+    "onCommand:ndot.disassemble",
+    "onCommand:ndot.assemble"
   ],
   "contributes": {
     "languages": [
@@ -112,30 +121,126 @@
       }
     ],
     "menus": {
+      "editor/title/run": [
+        {
+          "command": "plan.run",
+          "group": "navigation@1",
+          "when": "editorLangId == plan || resourceExtname == .plan"
+        },
+        {
+          "command": "ndot.run",
+          "group": "navigation@1",
+          "when": "editorLangId == ndot || editorLangId == ndasm || resourceExtname == .ndot || resourceExtname == .ndasm"
+        }
+      ],
       "editor/title": [
         {
           "command": "plan.run",
-          "group": "navigation",
+          "group": "navigation@1",
+          "when": "editorLangId == plan || resourceExtname == .plan"
+        },
+        {
+          "command": "plan.toPython",
+          "group": "navigation@2",
+          "when": "editorLangId == plan || resourceExtname == .plan"
+        },
+        {
+          "command": "ndot.run",
+          "group": "navigation@1",
+          "when": "editorLangId == ndot || editorLangId == ndasm || resourceExtname == .ndot || resourceExtname == .ndasm"
+        },
+        {
+          "command": "ndot.disassemble",
+          "group": "navigation@2",
+          "when": "editorLangId == ndot || resourceExtname == .ndot"
+        },
+        {
+          "command": "ndot.assemble",
+          "group": "navigation@2",
+          "when": "editorLangId == ndasm || resourceExtname == .ndasm"
+        }
+      ],
+      "editor/context": [
+        {
+          "command": "plan.run",
+          "group": "1_plan@1",
+          "when": "editorLangId == plan || resourceExtname == .plan"
+        },
+        {
+          "command": "plan.build",
+          "group": "1_plan@2",
+          "when": "editorLangId == plan || resourceExtname == .plan"
+        },
+        {
+          "command": "plan.toPython",
+          "group": "1_plan@3",
+          "when": "editorLangId == plan || resourceExtname == .plan"
+        },
+        {
+          "command": "plan.check",
+          "group": "1_plan@4",
+          "when": "editorLangId == plan || resourceExtname == .plan"
+        },
+        {
+          "command": "ndot.run",
+          "group": "1_ndot@1",
+          "when": "editorLangId == ndot || editorLangId == ndasm || resourceExtname == .ndot || resourceExtname == .ndasm"
+        },
+        {
+          "command": "ndot.build",
+          "group": "1_ndot@2",
+          "when": "editorLangId == ndot || resourceExtname == .ndot"
+        },
+        {
+          "command": "ndot.check",
+          "group": "1_ndot@3",
+          "when": "editorLangId == ndot || resourceExtname == .ndot"
+        },
+        {
+          "command": "ndot.disassemble",
+          "group": "1_ndot@4",
+          "when": "editorLangId == ndot || resourceExtname == .ndot"
+        },
+        {
+          "command": "ndot.assemble",
+          "group": "1_ndot@5",
+          "when": "editorLangId == ndasm || resourceExtname == .ndasm"
+        }
+      ],
+      "explorer/context": [
+        {
+          "command": "plan.run",
+          "group": "1_plan@1",
+          "when": "resourceExtname == .plan"
+        },
+        {
+          "command": "plan.build",
+          "group": "1_plan@2",
           "when": "resourceExtname == .plan"
         },
         {
           "command": "plan.toPython",
-          "group": "navigation",
+          "group": "1_plan@3",
           "when": "resourceExtname == .plan"
         },
         {
           "command": "ndot.run",
-          "group": "navigation",
+          "group": "1_ndot@1",
           "when": "resourceExtname == .ndot || resourceExtname == .ndasm"
         },
         {
+          "command": "ndot.build",
+          "group": "1_ndot@2",
+          "when": "resourceExtname == .ndot"
+        },
+        {
           "command": "ndot.disassemble",
-          "group": "navigation",
+          "group": "1_ndot@3",
           "when": "resourceExtname == .ndot"
         },
         {
           "command": "ndot.assemble",
-          "group": "navigation",
+          "group": "1_ndot@4",
           "when": "resourceExtname == .ndasm"
         }
       ]

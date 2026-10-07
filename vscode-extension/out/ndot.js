@@ -42,26 +42,32 @@ class NdotController {
         this.outputChannel = vscode.window.createOutputChannel('N-DOT Toolchain');
     }
     registerCommands(context) {
-        context.subscriptions.push(vscode.commands.registerCommand('ndot.run', () => this.run()), vscode.commands.registerCommand('ndot.build', () => this.build()), vscode.commands.registerCommand('ndot.check', () => this.check()), vscode.commands.registerCommand('ndot.disassemble', () => this.disassemble()), vscode.commands.registerCommand('ndot.assemble', () => this.assemble()));
+        context.subscriptions.push(vscode.commands.registerCommand('ndot.run', (uri) => this.run(uri)), vscode.commands.registerCommand('ndot.build', (uri) => this.build(uri)), vscode.commands.registerCommand('ndot.check', (uri) => this.check(uri)), vscode.commands.registerCommand('ndot.disassemble', (uri) => this.disassemble(uri)), vscode.commands.registerCommand('ndot.assemble', (uri) => this.assemble(uri)));
     }
-    getActiveFile(allowedExts = ['.ndot', '.ndasm']) {
-        const editor = vscode.window.activeTextEditor;
-        if (!editor) {
-            vscode.window.showErrorMessage('Please open an N-DOT (.ndot or .ndasm) file first.');
+    getTargetFile(allowedExts = ['.ndot', '.ndasm'], uri) {
+        let targetUri = uri;
+        if (!targetUri) {
+            const editor = vscode.window.activeTextEditor;
+            if (editor) {
+                targetUri = editor.document.uri;
+            }
+        }
+        if (!targetUri) {
+            vscode.window.showErrorMessage('Please open or select an N-DOT (.ndot or .ndasm) file first.');
             return null;
         }
-        const filePath = editor.document.fileName;
+        const filePath = targetUri.fsPath;
         const ext = path.extname(filePath).toLowerCase();
         if (!allowedExts.includes(ext)) {
-            vscode.window.showErrorMessage(`Active file must have extension ${allowedExts.join(' or ')}.`);
+            vscode.window.showErrorMessage(`Selected file must have extension ${allowedExts.join(' or ')}.`);
             return null;
         }
-        const workspaceFolder = vscode.workspace.getWorkspaceFolder(editor.document.uri);
+        const workspaceFolder = vscode.workspace.getWorkspaceFolder(targetUri);
         const cwd = workspaceFolder ? workspaceFolder.uri.fsPath : path.dirname(filePath);
         return { filePath, cwd, ext };
     }
-    run() {
-        const fileInfo = this.getActiveFile();
+    run(uri) {
+        const fileInfo = this.getTargetFile(['.ndot', '.ndasm'], uri);
         if (!fileInfo)
             return;
         const config = vscode.workspace.getConfiguration('ndot');
@@ -84,8 +90,8 @@ class NdotController {
         terminal.show();
         terminal.sendText(cmd);
     }
-    build() {
-        const fileInfo = this.getActiveFile(['.ndot']);
+    build(uri) {
+        const fileInfo = this.getTargetFile(['.ndot'], uri);
         if (!fileInfo)
             return;
         const config = vscode.workspace.getConfiguration('ndot');
@@ -112,8 +118,8 @@ class NdotController {
             });
         });
     }
-    check() {
-        const fileInfo = this.getActiveFile(['.ndot']);
+    check(uri) {
+        const fileInfo = this.getTargetFile(['.ndot'], uri);
         if (!fileInfo)
             return;
         const config = vscode.workspace.getConfiguration('ndot');
@@ -128,8 +134,8 @@ class NdotController {
             }
         });
     }
-    disassemble() {
-        const fileInfo = this.getActiveFile(['.ndot']);
+    disassemble(uri) {
+        const fileInfo = this.getTargetFile(['.ndot'], uri);
         if (!fileInfo)
             return;
         const config = vscode.workspace.getConfiguration('ndot');
@@ -149,8 +155,8 @@ class NdotController {
             }
         });
     }
-    assemble() {
-        const fileInfo = this.getActiveFile(['.ndasm']);
+    assemble(uri) {
+        const fileInfo = this.getTargetFile(['.ndasm'], uri);
         if (!fileInfo)
             return;
         const config = vscode.workspace.getConfiguration('ndot');

@@ -11,27 +11,35 @@ export class PlanController {
 
     public registerCommands(context: vscode.ExtensionContext): void {
         context.subscriptions.push(
-            vscode.commands.registerCommand('plan.run', () => this.run()),
-            vscode.commands.registerCommand('plan.build', () => this.build()),
-            vscode.commands.registerCommand('plan.check', () => this.check()),
-            vscode.commands.registerCommand('plan.toPython', () => this.previewPython())
+            vscode.commands.registerCommand('plan.run', (uri?: vscode.Uri) => this.run(uri)),
+            vscode.commands.registerCommand('plan.build', (uri?: vscode.Uri) => this.build(uri)),
+            vscode.commands.registerCommand('plan.check', (uri?: vscode.Uri) => this.check(uri)),
+            vscode.commands.registerCommand('plan.toPython', (uri?: vscode.Uri) => this.previewPython(uri))
         );
     }
 
-    private getActiveFile(): { filePath: string; cwd: string } | null {
-        const editor = vscode.window.activeTextEditor;
-        if (!editor || !editor.document.fileName.endsWith('.plan')) {
-            vscode.window.showErrorMessage('Please open a .plan file first.');
+    private getTargetFile(uri?: vscode.Uri): { filePath: string; cwd: string } | null {
+        let targetUri = uri;
+        if (!targetUri) {
+            const editor = vscode.window.activeTextEditor;
+            if (editor) {
+                targetUri = editor.document.uri;
+            }
+        }
+
+        if (!targetUri || !targetUri.fsPath.endsWith('.plan')) {
+            vscode.window.showErrorMessage('Please open or select a .plan file first.');
             return null;
         }
-        const filePath = editor.document.fileName;
-        const workspaceFolder = vscode.workspace.getWorkspaceFolder(editor.document.uri);
+
+        const filePath = targetUri.fsPath;
+        const workspaceFolder = vscode.workspace.getWorkspaceFolder(targetUri);
         const cwd = workspaceFolder ? workspaceFolder.uri.fsPath : path.dirname(filePath);
         return { filePath, cwd };
     }
 
-    public run(): void {
-        const fileInfo = this.getActiveFile();
+    public run(uri?: vscode.Uri): void {
+        const fileInfo = this.getTargetFile(uri);
         if (!fileInfo) return;
 
         const config = vscode.workspace.getConfiguration('plan');
@@ -49,8 +57,8 @@ export class PlanController {
         terminal.sendText(cmd);
     }
 
-    public build(): void {
-        const fileInfo = this.getActiveFile();
+    public build(uri?: vscode.Uri): void {
+        const fileInfo = this.getTargetFile(uri);
         if (!fileInfo) return;
 
         const config = vscode.workspace.getConfiguration('plan');
@@ -79,8 +87,8 @@ export class PlanController {
         });
     }
 
-    public check(): void {
-        const fileInfo = this.getActiveFile();
+    public check(uri?: vscode.Uri): void {
+        const fileInfo = this.getTargetFile(uri);
         if (!fileInfo) return;
 
         const config = vscode.workspace.getConfiguration('plan');
@@ -96,8 +104,8 @@ export class PlanController {
         });
     }
 
-    public previewPython(): void {
-        const fileInfo = this.getActiveFile();
+    public previewPython(uri?: vscode.Uri): void {
+        const fileInfo = this.getTargetFile(uri);
         if (!fileInfo) return;
 
         const config = vscode.workspace.getConfiguration('plan');

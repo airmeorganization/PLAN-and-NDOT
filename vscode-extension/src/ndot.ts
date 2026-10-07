@@ -11,33 +11,39 @@ export class NdotController {
 
     public registerCommands(context: vscode.ExtensionContext): void {
         context.subscriptions.push(
-            vscode.commands.registerCommand('ndot.run', () => this.run()),
-            vscode.commands.registerCommand('ndot.build', () => this.build()),
-            vscode.commands.registerCommand('ndot.check', () => this.check()),
-            vscode.commands.registerCommand('ndot.disassemble', () => this.disassemble()),
-            vscode.commands.registerCommand('ndot.assemble', () => this.assemble())
+            vscode.commands.registerCommand('ndot.run', (uri?: vscode.Uri) => this.run(uri)),
+            vscode.commands.registerCommand('ndot.build', (uri?: vscode.Uri) => this.build(uri)),
+            vscode.commands.registerCommand('ndot.check', (uri?: vscode.Uri) => this.check(uri)),
+            vscode.commands.registerCommand('ndot.disassemble', (uri?: vscode.Uri) => this.disassemble(uri)),
+            vscode.commands.registerCommand('ndot.assemble', (uri?: vscode.Uri) => this.assemble(uri))
         );
     }
 
-    private getActiveFile(allowedExts: string[] = ['.ndot', '.ndasm']): { filePath: string; cwd: string; ext: string } | null {
-        const editor = vscode.window.activeTextEditor;
-        if (!editor) {
-            vscode.window.showErrorMessage('Please open an N-DOT (.ndot or .ndasm) file first.');
+    private getTargetFile(allowedExts: string[] = ['.ndot', '.ndasm'], uri?: vscode.Uri): { filePath: string; cwd: string; ext: string } | null {
+        let targetUri = uri;
+        if (!targetUri) {
+            const editor = vscode.window.activeTextEditor;
+            if (editor) {
+                targetUri = editor.document.uri;
+            }
+        }
+        if (!targetUri) {
+            vscode.window.showErrorMessage('Please open or select an N-DOT (.ndot or .ndasm) file first.');
             return null;
         }
-        const filePath = editor.document.fileName;
+        const filePath = targetUri.fsPath;
         const ext = path.extname(filePath).toLowerCase();
         if (!allowedExts.includes(ext)) {
-            vscode.window.showErrorMessage(`Active file must have extension ${allowedExts.join(' or ')}.`);
+            vscode.window.showErrorMessage(`Selected file must have extension ${allowedExts.join(' or ')}.`);
             return null;
         }
-        const workspaceFolder = vscode.workspace.getWorkspaceFolder(editor.document.uri);
+        const workspaceFolder = vscode.workspace.getWorkspaceFolder(targetUri);
         const cwd = workspaceFolder ? workspaceFolder.uri.fsPath : path.dirname(filePath);
         return { filePath, cwd, ext };
     }
 
-    public run(): void {
-        const fileInfo = this.getActiveFile();
+    public run(uri?: vscode.Uri): void {
+        const fileInfo = this.getTargetFile(['.ndot', '.ndasm'], uri);
         if (!fileInfo) return;
 
         const config = vscode.workspace.getConfiguration('ndot');
@@ -64,8 +70,8 @@ export class NdotController {
         terminal.sendText(cmd);
     }
 
-    public build(): void {
-        const fileInfo = this.getActiveFile(['.ndot']);
+    public build(uri?: vscode.Uri): void {
+        const fileInfo = this.getTargetFile(['.ndot'], uri);
         if (!fileInfo) return;
 
         const config = vscode.workspace.getConfiguration('ndot');
@@ -94,8 +100,8 @@ export class NdotController {
         });
     }
 
-    public check(): void {
-        const fileInfo = this.getActiveFile(['.ndot']);
+    public check(uri?: vscode.Uri): void {
+        const fileInfo = this.getTargetFile(['.ndot'], uri);
         if (!fileInfo) return;
 
         const config = vscode.workspace.getConfiguration('ndot');
@@ -111,8 +117,8 @@ export class NdotController {
         });
     }
 
-    public disassemble(): void {
-        const fileInfo = this.getActiveFile(['.ndot']);
+    public disassemble(uri?: vscode.Uri): void {
+        const fileInfo = this.getTargetFile(['.ndot'], uri);
         if (!fileInfo) return;
 
         const config = vscode.workspace.getConfiguration('ndot');
@@ -133,8 +139,8 @@ export class NdotController {
         });
     }
 
-    public assemble(): void {
-        const fileInfo = this.getActiveFile(['.ndasm']);
+    public assemble(uri?: vscode.Uri): void {
+        const fileInfo = this.getTargetFile(['.ndasm'], uri);
         if (!fileInfo) return;
 
         const config = vscode.workspace.getConfiguration('ndot');
