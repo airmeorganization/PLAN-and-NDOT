@@ -26,11 +26,11 @@ class Lexer:
         column = 1
         current_segment = []
         segment_start_col = 1
-        saw_dot = False
-        saw_non_whitespace = False
+        last_non_space_char = None
+        last_non_space_line = 1
+        last_non_space_col = 1
 
         def emit_segment(col_start):
-            nonlocal saw_dot
             if not current_segment:
                 return
             val = "".join(current_segment)
@@ -49,12 +49,12 @@ class Lexer:
             else:
                 tokens.append(Token("SEGMENT", val, line_num, col_start))
             current_segment.clear()
-            saw_dot = False
 
         for char in self.source_code:
             if char.isspace():
-                if char == '\n':
+                if current_segment:
                     emit_segment(segment_start_col)
+                if char == '\n':
                     line_num += 1
                     column = 1
                 else:
@@ -62,28 +62,41 @@ class Lexer:
                 continue
 
             if char.isdigit():
-                saw_non_whitespace = True
-                saw_dot = False
                 if not current_segment:
                     segment_start_col = column
                 current_segment.append(char)
+                last_non_space_char = char
+                last_non_space_line = line_num
+                last_non_space_col = column
                 column += 1
                 continue
 
             if char == '.':
-                if not saw_non_whitespace or saw_dot or not current_segment:
+                if last_non_space_char is None:
                     lines = self.source_code.split('\n')
                     source_line = lines[line_num - 1] if line_num <= len(lines) else ""
                     raise CompileError(
-                        "Empty segment in N-DOT source (consecutive or leading dot)",
+                        "Empty segment in N-DOT source (leading dot)",
                         line=line_num,
                         column=column,
                         code="N102",
                         source_line=source_line
                     )
-                saw_non_whitespace = True
-                emit_segment(segment_start_col)
-                saw_dot = True
+                if last_non_space_char == '.':
+                    lines = self.source_code.split('\n')
+                    source_line = lines[line_num - 1] if line_num <= len(lines) else ""
+                    raise CompileError(
+                        "Empty segment in N-DOT source (consecutive dots)",
+                        line=line_num,
+                        column=column,
+                        code="N102",
+                        source_line=source_line
+                    )
+                if current_segment:
+                    emit_segment(segment_start_col)
+                last_non_space_char = '.'
+                last_non_space_line = line_num
+                last_non_space_col = column
                 column += 1
                 continue
 
@@ -98,20 +111,21 @@ class Lexer:
                 source_line=source_line
             )
 
-        # If ended with a trailing dot:
-        if saw_dot:
+        # Emit final segment if any
+        if current_segment:
+            emit_segment(segment_start_col)
+
+        # Check trailing dot (last non-whitespace character was '.')
+        if last_non_space_char == '.':
             lines = self.source_code.split('\n')
-            source_line = lines[line_num - 1] if line_num <= len(lines) else ""
+            source_line = lines[last_non_space_line - 1] if last_non_space_line <= len(lines) else ""
             raise CompileError(
                 "Empty segment in N-DOT source (trailing dot)",
-                line=line_num,
-                column=column - 1,
+                line=last_non_space_line,
+                column=last_non_space_col,
                 code="N102",
                 source_line=source_line
             )
-
-        # Emit final segment if any
-        emit_segment(segment_start_col)
 
         # Check N104: Program must end with terminator '0'
         if tokens:
@@ -122,11 +136,11 @@ class Lexer:
                     column=tokens[-1].column,
                     code="N104"
                 )
-        elif saw_non_whitespace:
+        elif last_non_space_char is not None:
             raise CompileError(
                 "Program does not end with the terminator '0'",
-                line=line_num,
-                column=column,
+                line=last_non_space_line,
+                column=last_non_space_col,
                 code="N104"
             )
 
