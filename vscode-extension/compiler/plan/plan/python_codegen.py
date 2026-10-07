@@ -51,66 +51,11 @@ class Codegen:
                 if s:
                     regular_stmts.append(s)
 
-        # Injected module header with standalone fallback if plan package is not installed:
-        header_code = """try:
-    import plan.runtime as plan_rt
-except ImportError:
-    class _PlanRT:
-        @staticmethod
-        def to_number(val, line=None):
-            if isinstance(val, (int, float)): return val
-            try:
-                s = str(val).strip()
-                if '.' in s:
-                    f = float(s)
-                    return int(f) if f.is_integer() else f
-                return int(s)
-            except ValueError:
-                prefix = f"Line {line}: " if line else ""
-                raise ValueError(f"{prefix}Cannot convert '{val}' to a number.")
-        @staticmethod
-        def to_whole_number(val, line=None):
-            if isinstance(val, int): return val
-            try: return int(float(str(val).strip()))
-            except ValueError:
-                prefix = f"Line {line}: " if line else ""
-                raise ValueError(f"{prefix}Cannot convert '{val}' to a whole number.")
-        @staticmethod
-        def item(seq, n, line=None):
-            try:
-                idx = int(n)
-                if idx <= 0:
-                    prefix = f"Line {line}: " if line else ""
-                    raise IndexError(f"{prefix}PLAN indexing is 1-based, but received index {idx}.")
-                return seq[idx - 1]
-            except IndexError:
-                prefix = f"Line {line}: " if line else ""
-                length = len(seq) if hasattr(seq, '__len__') else 'unknown'
-                raise IndexError(f"{prefix}there is no item {n} in sequence — it only has {length} items.")
-        @staticmethod
-        def set_item(seq, n, val, line=None):
-            try:
-                idx = int(n)
-                if idx <= 0:
-                    prefix = f"Line {line}: " if line else ""
-                    raise IndexError(f"{prefix}PLAN indexing is 1-based, but received index {idx}.")
-                seq[idx - 1] = val
-            except IndexError:
-                prefix = f"Line {line}: " if line else ""
-                length = len(seq) if hasattr(seq, '__len__') else 'unknown'
-                raise IndexError(f"{prefix}cannot set item {n} — sequence only has {length} items.")
-        @staticmethod
-        def entry(mapping, key, line=None):
-            try: return mapping[key]
-            except KeyError:
-                prefix = f"Line {line}: " if line else ""
-                raise KeyError(f"{prefix}entry '{key}' not found in dictionary.")
-        @staticmethod
-        def set_entry(mapping, key, val, line=None):
-            mapping[key] = val
-    plan_rt = _PlanRT
-"""
-        header_stmts: List[pyast.stmt] = list(pyast.parse(header_code).body)
+        # Injected module header:
+        # import plan.runtime as plan_rt
+        header_stmts: List[pyast.stmt] = [
+            pyast.Import(names=[pyast.alias(name='plan.runtime', asname='plan_rt')], lineno=1, col_offset=0)
+        ]
 
         # Additional required standard library imports discovered from phrases
         for mod in sorted(self.needed_imports):

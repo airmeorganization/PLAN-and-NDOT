@@ -38,7 +38,8 @@ const vscode = __importStar(require("vscode"));
 const child_process_1 = require("child_process");
 const path = __importStar(require("path"));
 class NdotController {
-    constructor() {
+    constructor(resolver) {
+        this.resolver = resolver;
         this.outputChannel = vscode.window.createOutputChannel('N-DOT Toolchain');
     }
     registerCommands(context) {
@@ -71,7 +72,8 @@ class NdotController {
         if (!fileInfo)
             return;
         const config = vscode.workspace.getConfiguration('ndot');
-        const pythonPath = config.get('pythonPath', 'python');
+        const pythonPath = this.resolver.getPythonPath('ndot');
+        const toolchain = this.resolver.getNdotCli(fileInfo.cwd);
         const allowFiles = config.get('allowFiles', false) ? ' --allow-files' : '';
         const allowNetwork = config.get('allowNetwork', false) ? ' --allow-network' : '';
         // If .ndasm, assemble first or run directly
@@ -79,13 +81,13 @@ class NdotController {
         let setupCmd = '';
         if (fileInfo.ext === '.ndasm') {
             const tempNdot = fileInfo.filePath.replace(/\.ndasm$/, '.ndot');
-            setupCmd = `"${pythonPath}" -m ndot.cli asm "${fileInfo.filePath}" -o "${tempNdot}" && `;
+            setupCmd = `"${pythonPath}" "${toolchain.cliPath}" asm "${fileInfo.filePath}" -o "${tempNdot}" && `;
             targetFile = tempNdot;
         }
-        const cmd = `${setupCmd}"${pythonPath}" -m ndot.cli run "${targetFile}"${allowFiles}${allowNetwork}`;
+        const cmd = `${setupCmd}"${pythonPath}" "${toolchain.cliPath}" run "${targetFile}"${allowFiles}${allowNetwork}`;
         let terminal = vscode.window.terminals.find(t => t.name === 'N-DOT');
         if (!terminal) {
-            terminal = vscode.window.createTerminal({ name: 'N-DOT', cwd: fileInfo.cwd });
+            terminal = vscode.window.createTerminal({ name: 'N-DOT', cwd: fileInfo.cwd, env: toolchain.env });
         }
         terminal.show();
         terminal.sendText(cmd);
@@ -94,8 +96,8 @@ class NdotController {
         const fileInfo = this.getTargetFile(['.ndot'], uri);
         if (!fileInfo)
             return;
-        const config = vscode.workspace.getConfiguration('ndot');
-        const pythonPath = config.get('pythonPath', 'python');
+        const pythonPath = this.resolver.getPythonPath('ndot');
+        const toolchain = this.resolver.getNdotCli(fileInfo.cwd);
         const defaultOut = fileInfo.filePath.replace(/\.ndot$/, '.py');
         vscode.window.showInputBox({
             prompt: 'Output Python file path',
@@ -103,10 +105,10 @@ class NdotController {
         }).then(outPath => {
             if (!outPath)
                 return;
-            const cmd = `"${pythonPath}" -m ndot.cli build "${fileInfo.filePath}" -o "${outPath}"`;
+            const cmd = `"${pythonPath}" "${toolchain.cliPath}" build "${fileInfo.filePath}" -o "${outPath}"`;
             this.outputChannel.show(true);
             this.outputChannel.appendLine(`[N-DOT Build] ${cmd}`);
-            (0, child_process_1.exec)(cmd, { cwd: fileInfo.cwd }, (error, stdout, stderr) => {
+            (0, child_process_1.exec)(cmd, { cwd: fileInfo.cwd, env: toolchain.env }, (error, stdout, stderr) => {
                 if (error) {
                     this.outputChannel.appendLine(`[Error] ${stderr || stdout}`);
                     vscode.window.showErrorMessage(`N-DOT build failed: ${stderr || stdout}`);
@@ -122,10 +124,10 @@ class NdotController {
         const fileInfo = this.getTargetFile(['.ndot'], uri);
         if (!fileInfo)
             return;
-        const config = vscode.workspace.getConfiguration('ndot');
-        const pythonPath = config.get('pythonPath', 'python');
-        const cmd = `"${pythonPath}" -m ndot.cli check "${fileInfo.filePath}"`;
-        (0, child_process_1.exec)(cmd, { cwd: fileInfo.cwd }, (error, stdout, stderr) => {
+        const pythonPath = this.resolver.getPythonPath('ndot');
+        const toolchain = this.resolver.getNdotCli(fileInfo.cwd);
+        const cmd = `"${pythonPath}" "${toolchain.cliPath}" check "${fileInfo.filePath}"`;
+        (0, child_process_1.exec)(cmd, { cwd: fileInfo.cwd, env: toolchain.env }, (error, stdout, stderr) => {
             if (error) {
                 vscode.window.showErrorMessage(`N-DOT Check Failed: ${(stderr || stdout).trim()}`);
             }
@@ -138,10 +140,10 @@ class NdotController {
         const fileInfo = this.getTargetFile(['.ndot'], uri);
         if (!fileInfo)
             return;
-        const config = vscode.workspace.getConfiguration('ndot');
-        const pythonPath = config.get('pythonPath', 'python');
-        const cmd = `"${pythonPath}" -m ndot.cli dis "${fileInfo.filePath}"`;
-        (0, child_process_1.exec)(cmd, { cwd: fileInfo.cwd }, (error, stdout, stderr) => {
+        const pythonPath = this.resolver.getPythonPath('ndot');
+        const toolchain = this.resolver.getNdotCli(fileInfo.cwd);
+        const cmd = `"${pythonPath}" "${toolchain.cliPath}" dis "${fileInfo.filePath}"`;
+        (0, child_process_1.exec)(cmd, { cwd: fileInfo.cwd, env: toolchain.env }, (error, stdout, stderr) => {
             if (error) {
                 vscode.window.showErrorMessage(`N-DOT disassembly failed: ${(stderr || stdout).trim()}`);
             }
@@ -159,8 +161,8 @@ class NdotController {
         const fileInfo = this.getTargetFile(['.ndasm'], uri);
         if (!fileInfo)
             return;
-        const config = vscode.workspace.getConfiguration('ndot');
-        const pythonPath = config.get('pythonPath', 'python');
+        const pythonPath = this.resolver.getPythonPath('ndot');
+        const toolchain = this.resolver.getNdotCli(fileInfo.cwd);
         const defaultOut = fileInfo.filePath.replace(/\.ndasm$/, '.ndot');
         vscode.window.showInputBox({
             prompt: 'Output .ndot file path',
@@ -168,10 +170,10 @@ class NdotController {
         }).then(outPath => {
             if (!outPath)
                 return;
-            const cmd = `"${pythonPath}" -m ndot.cli asm "${fileInfo.filePath}" -o "${outPath}"`;
+            const cmd = `"${pythonPath}" "${toolchain.cliPath}" asm "${fileInfo.filePath}" -o "${outPath}"`;
             this.outputChannel.show(true);
             this.outputChannel.appendLine(`[N-DOT Assemble] ${cmd}`);
-            (0, child_process_1.exec)(cmd, { cwd: fileInfo.cwd }, (error, stdout, stderr) => {
+            (0, child_process_1.exec)(cmd, { cwd: fileInfo.cwd, env: toolchain.env }, (error, stdout, stderr) => {
                 if (error) {
                     this.outputChannel.appendLine(`[Error] ${stderr || stdout}`);
                     vscode.window.showErrorMessage(`Assembly failed: ${stderr || stdout}`);

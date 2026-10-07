@@ -4,6 +4,10 @@
   "description": "Language support, syntax highlighting, diagnostics, compilation, and execution for PLAN (Plain Language) and N-DOT (Neural-DOT).",
   "version": "0.1.0",
   "publisher": "airmeorganization",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/airmeorganization/PLAN-and-NDOT.git"
+  },
   "license": "MIT",
   "engines": {
     "vscode": "^1.75.0"
@@ -282,12 +286,17 @@
           "type": "boolean",
           "default": true,
           "description": "Run check diagnostics automatically on save."
+        },
+        "planAndNdot.diagnosticsOnChange": {
+          "type": "boolean",
+          "default": false,
+          "description": "Run check diagnostics continuously while typing (debounced at 600ms). When false, diagnostics only run on save."
         }
       }
     }
   },
   "scripts": {
-    "vscode:prepublish": "node -e \"process.exit(0)\"",
+    "vscode:prepublish": "npm run compile",
     "compile": "tsc -p ./",
     "watch": "tsc -watch -p ./"
   },

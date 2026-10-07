@@ -1,0 +1,768 @@
+{
+  "101": {
+    "path": "1.0.1",
+    "name": "create model",
+    "domain": "models",
+    "operands": ["D:dest", "C:arch", "...L:sizes"],
+    "python": "{dest} = rt.create_model({arch}, {sizes})"
+  },
+  "102": {
+    "path": "1.0.2",
+    "name": "load model",
+    "domain": "models",
+    "operands": ["D:dest", "S:path"],
+    "python": "{dest} = rt.load_model({path})",
+    "permissions": ["files"]
+  },
+  "103": {
+    "path": "1.0.3",
+    "name": "inference",
+    "domain": "models",
+    "operands": ["D:dest", "S:model", "S:x"],
+    "python": "{dest} = {model}.predict({x})"
+  },
+  "104": {
+    "path": "1.0.4",
+    "name": "train",
+    "domain": "models",
+    "operands": ["D:dest", "S:model", "S:dataset", "L:epochs", "S:learning_rate"],
+    "python": "{dest} = {model}.fit({dataset}, {epochs}, {learning_rate})"
+  },
+  "105": {
+    "path": "1.0.5",
+    "name": "evaluate",
+    "domain": "models",
+    "operands": ["D:dest", "S:model", "S:dataset"],
+    "python": "{dest} = {model}.evaluate({dataset})"
+  },
+  "106": {
+    "path": "1.0.6",
+    "name": "save model",
+    "domain": "models",
+    "operands": ["S:model", "S:path"],
+    "python": "{model}.save({path})",
+    "permissions": ["files"]
+  },
+  "107": {
+    "path": "1.0.7",
+    "name": "parameters",
+    "domain": "models",
+    "operands": ["D:dest", "S:model"],
+    "python": "{dest} = {model}.parameters()"
+  },
+
+  "201": {
+    "path": "2.0.1",
+    "name": "tensor",
+    "domain": "tensors",
+    "operands": ["D:dest", "S:nested_list"],
+    "python": "{dest} = rt.tensor({nested_list})"
+  },
+  "202": {
+    "path": "2.0.2",
+    "name": "vector",
+    "domain": "tensors",
+    "operands": ["D:dest", "...S:items"],
+    "python": "{dest} = rt.tensor([{items}])"
+  },
+  "203": {
+    "path": "2.0.3",
+    "name": "matrix",
+    "domain": "tensors",
+    "operands": ["D:dest", "L:rows", "L:cols", "S:flat_list"],
+    "python": "{dest} = rt.tensor({flat_list}).reshape({rows}, {cols})"
+  },
+  "204": {
+    "path": "2.0.4",
+    "name": "reshape",
+    "domain": "tensors",
+    "operands": ["D:dest", "S:tensor", "...L:dims"],
+    "python": "{dest} = {tensor}.reshape({dims})"
+  },
+  "205": {
+    "path": "2.0.5",
+    "name": "normalize",
+    "domain": "tensors",
+    "operands": ["D:dest", "S:tensor"],
+    "python": "{dest} = rt.l2_normalize({tensor})"
+  },
+  "206": {
+    "path": "2.0.6",
+    "name": "zeros",
+    "domain": "tensors",
+    "operands": ["D:dest", "...L:dims"],
+    "python": "{dest} = rt.zeros({dims})"
+  },
+  "207": {
+    "path": "2.0.7",
+    "name": "ones",
+    "domain": "tensors",
+    "operands": ["D:dest", "...L:dims"],
+    "python": "{dest} = rt.ones({dims})"
+  },
+  "208": {
+    "path": "2.0.8",
+    "name": "random",
+    "domain": "tensors",
+    "operands": ["D:dest", "L:seed", "...L:dims"],
+    "python": "{dest} = rt.randn({seed}, {dims})"
+  },
+  "209": {
+    "path": "2.0.9",
+    "name": "shape",
+    "domain": "tensors",
+    "operands": ["D:dest", "S:tensor"],
+    "python": "{dest} = list({tensor}.shape)"
+  },
+  "211": {
+    "path": "2.1.1",
+    "name": "matmul",
+    "domain": "tensors",
+    "operands": ["D:dest", "S:a", "S:b"],
+    "python": "{dest} = rt.matmul({a}, {b})"
+  },
+  "212": {
+    "path": "2.1.2",
+    "name": "transpose",
+    "domain": "tensors",
+    "operands": ["D:dest", "S:tensor"],
+    "python": "{dest} = rt.transpose({tensor})"
+  },
+  "213": {
+    "path": "2.1.3",
+    "name": "to list",
+    "domain": "tensors",
+    "operands": ["D:dest", "S:tensor"],
+    "python": "{dest} = {tensor}.tolist()"
+  },
+
+  "301": {
+    "path": "3.0.1",
+    "name": "linear",
+    "domain": "neural",
+    "operands": ["D:dest", "S:x", "S:weight", "S:bias"],
+    "python": "{dest} = rt.linear({x}, {weight}, {bias})"
+  },
+  "302": {
+    "path": "3.0.2",
+    "name": "convolution 1-D",
+    "domain": "neural",
+    "operands": ["D:dest", "S:x", "S:kernel"],
+    "python": "{dest} = rt.conv1d({x}, {kernel})"
+  },
+  "303": {
+    "path": "3.0.3",
+    "name": "attention",
+    "domain": "neural",
+    "operands": ["D:dest", "S:q", "S:k", "S:v"],
+    "python": "{dest} = rt.attention({q}, {k}, {v})"
+  },
+  "304": {
+    "path": "3.0.4",
+    "name": "activation",
+    "domain": "neural",
+    "operands": ["D:dest", "S:tensor", "C:kind"],
+    "python": "{dest} = rt.activate({tensor}, {kind})"
+  },
+  "305": {
+    "path": "3.0.5",
+    "name": "embedding",
+    "domain": "neural",
+    "operands": ["D:dest", "S:table", "S:indices"],
+    "python": "{dest} = rt.embed({table}, {indices})"
+  },
+  "306": {
+    "path": "3.0.6",
+    "name": "layer norm",
+    "domain": "neural",
+    "operands": ["D:dest", "S:tensor"],
+    "python": "{dest} = rt.layer_norm({tensor})"
+  },
+  "307": {
+    "path": "3.0.7",
+    "name": "loss",
+    "domain": "neural",
+    "operands": ["D:dest", "S:pred", "S:target", "C:kind"],
+    "python": "{dest} = rt.loss({pred}, {target}, {kind})"
+  },
+
+  "401": {
+    "path": "4.0.1",
+    "name": "dataset",
+    "domain": "datasets",
+    "operands": ["D:dest", "S:x", "S:y"],
+    "python": "{dest} = rt.Dataset({x}, {y})"
+  },
+  "402": {
+    "path": "4.0.2",
+    "name": "batch",
+    "domain": "datasets",
+    "operands": ["D:dest", "S:dataset", "L:size"],
+    "python": "{dest} = {dataset}.batches({size})"
+  },
+  "403": {
+    "path": "4.0.3",
+    "name": "sample",
+    "domain": "datasets",
+    "operands": ["D:dest", "S:dataset", "S:index"],
+    "python": "{dest} = {dataset}[{index}]"
+  },
+  "404": {
+    "path": "4.0.4",
+    "name": "shuffle",
+    "domain": "datasets",
+    "operands": ["D:dest", "S:dataset", "L:seed"],
+    "python": "{dest} = {dataset}.shuffled({seed})"
+  },
+  "405": {
+    "path": "4.0.5",
+    "name": "split",
+    "domain": "datasets",
+    "operands": ["D:first", "D:second", "S:dataset", "L:percent"],
+    "python": "{first}, {second} = {dataset}.split({percent} / 100.0)"
+  },
+  "406": {
+    "path": "4.0.6",
+    "name": "load CSV",
+    "domain": "datasets",
+    "operands": ["D:dest", "S:path"],
+    "python": "{dest} = rt.load_csv({path})",
+    "permissions": ["files"]
+  },
+  "407": {
+    "path": "4.0.7",
+    "name": "size",
+    "domain": "datasets",
+    "operands": ["D:dest", "S:dataset"],
+    "python": "{dest} = len({dataset})"
+  },
+
+  "501": {
+    "path": "5.0.1",
+    "name": "if",
+    "domain": "control",
+    "operands": ["S:cond"],
+    "python": "if {cond}:",
+    "opens_block": true
+  },
+  "502": {
+    "path": "5.0.2",
+    "name": "while",
+    "domain": "control",
+    "operands": ["S:cond"],
+    "python": "while {cond}:",
+    "opens_block": true
+  },
+  "503": {
+    "path": "5.0.3",
+    "name": "repeat",
+    "domain": "control",
+    "operands": ["L:count"],
+    "python": "for _ in range({count}):",
+    "opens_block": true
+  },
+  "504": {
+    "path": "5.0.4",
+    "name": "stop",
+    "domain": "control",
+    "operands": [],
+    "python": "break"
+  },
+  "505": {
+    "path": "5.0.5",
+    "name": "next",
+    "domain": "control",
+    "operands": [],
+    "python": "continue"
+  },
+  "506": {
+    "path": "5.0.6",
+    "name": "otherwise",
+    "domain": "control",
+    "operands": [],
+    "python": "else:",
+    "opens_block": true,
+    "closes_block": true
+  },
+  "507": {
+    "path": "5.0.7",
+    "name": "for range",
+    "domain": "control",
+    "operands": ["D:var", "S:start", "S:end"],
+    "python": "for {var} in range({start}, {end} + 1):",
+    "opens_block": true
+  },
+  "508": {
+    "path": "5.0.8",
+    "name": "for each",
+    "domain": "control",
+    "operands": ["D:var", "S:iterable"],
+    "python": "for {var} in {iterable}:",
+    "opens_block": true
+  },
+  "509": {
+    "path": "5.0.9",
+    "name": "end block",
+    "domain": "control",
+    "operands": [],
+    "python": "",
+    "closes_block": true
+  },
+  "510": {
+    "path": "5.1.0",
+    "name": "define function",
+    "domain": "control",
+    "operands": ["F:id", "[L:param_count]"],
+    "python": "def f{id}({params}):",
+    "opens_block": true,
+    "is_function_def": true
+  },
+  "511": {
+    "path": "5.1.1",
+    "name": "return",
+    "domain": "control",
+    "operands": ["[S:value]"],
+    "python": "return {value}"
+  },
+  "512": {
+    "path": "5.1.2",
+    "name": "call",
+    "domain": "control",
+    "operands": ["D:dest", "F:id", "...S:args"],
+    "python": "{dest} = f{id}({args})"
+  },
+
+  "601": {
+    "path": "6.0.1",
+    "name": "store copy",
+    "domain": "memory",
+    "operands": ["D:dest", "S:source"],
+    "python": "{dest} = {source}"
+  },
+  "602": {
+    "path": "6.0.2",
+    "name": "load persistent",
+    "domain": "memory",
+    "operands": ["D:dest", "S:key"],
+    "python": "{dest} = rt.mem_load({key})"
+  },
+  "603": {
+    "path": "6.0.3",
+    "name": "cache persistent",
+    "domain": "memory",
+    "operands": ["S:key", "S:value"],
+    "python": "rt.mem_store({key}, {value})"
+  },
+  "604": {
+    "path": "6.0.4",
+    "name": "delete",
+    "domain": "memory",
+    "operands": ["S:source"],
+    "python": "{source} = None"
+  },
+  "610": {
+    "path": "6.1.0",
+    "name": "positive integer",
+    "domain": "literals",
+    "operands": ["D:dest", "L:value"],
+    "python": "{dest} = {value}"
+  },
+  "611": {
+    "path": "6.1.1",
+    "name": "negative integer",
+    "domain": "literals",
+    "operands": ["D:dest", "L:magnitude"],
+    "python": "{dest} = -{magnitude}"
+  },
+  "612": {
+    "path": "6.1.2",
+    "name": "zero",
+    "domain": "literals",
+    "operands": ["D:dest"],
+    "python": "{dest} = 0"
+  },
+  "613": {
+    "path": "6.1.3",
+    "name": "positive decimal",
+    "domain": "literals",
+    "operands": ["D:dest", "L:mantissa", "L:scale"],
+    "python": "{dest} = {mantissa} / (10 ** {scale})"
+  },
+  "614": {
+    "path": "6.1.4",
+    "name": "negative decimal",
+    "domain": "literals",
+    "operands": ["D:dest", "L:mantissa", "L:scale"],
+    "python": "{dest} = -({mantissa} / (10 ** {scale}))"
+  },
+  "615": {
+    "path": "6.1.5",
+    "name": "text",
+    "domain": "literals",
+    "operands": ["D:dest", "...L:codepoints"],
+    "python": "{dest} = {text_literal}"
+  },
+  "616": {
+    "path": "6.1.6",
+    "name": "true",
+    "domain": "literals",
+    "operands": ["D:dest"],
+    "python": "{dest} = True"
+  },
+  "617": {
+    "path": "6.1.7",
+    "name": "false",
+    "domain": "literals",
+    "operands": ["D:dest"],
+    "python": "{dest} = False"
+  },
+  "618": {
+    "path": "6.1.8",
+    "name": "nothing",
+    "domain": "literals",
+    "operands": ["D:dest"],
+    "python": "{dest} = None"
+  },
+  "620": {
+    "path": "6.2.0",
+    "name": "list",
+    "domain": "collections",
+    "operands": ["D:dest", "...S:items"],
+    "python": "{dest} = [{items}]"
+  },
+  "621": {
+    "path": "6.2.1",
+    "name": "append",
+    "domain": "collections",
+    "operands": ["S:list", "S:value"],
+    "python": "{list}.append({value})"
+  },
+  "622": {
+    "path": "6.2.2",
+    "name": "get item",
+    "domain": "collections",
+    "operands": ["D:dest", "S:list", "S:index"],
+    "python": "{dest} = {list}[{index}]"
+  },
+  "623": {
+    "path": "6.2.3",
+    "name": "set item",
+    "domain": "collections",
+    "operands": ["S:list", "S:index", "S:value"],
+    "python": "{list}[{index}] = {value}"
+  },
+  "624": {
+    "path": "6.2.4",
+    "name": "length",
+    "domain": "collections",
+    "operands": ["D:dest", "S:source"],
+    "python": "{dest} = len({source})"
+  },
+  "625": {
+    "path": "6.2.5",
+    "name": "dictionary",
+    "domain": "collections",
+    "operands": ["D:dest"],
+    "python": "{dest} = {{}}"
+  },
+  "626": {
+    "path": "6.2.6",
+    "name": "set key",
+    "domain": "collections",
+    "operands": ["S:dict", "S:key", "S:value"],
+    "python": "{dict}[{key}] = {value}"
+  },
+  "627": {
+    "path": "6.2.7",
+    "name": "get key",
+    "domain": "collections",
+    "operands": ["D:dest", "S:dict", "S:key"],
+    "python": "{dest} = {dict}[{key}]"
+  },
+  "629": {
+    "path": "6.2.9",
+    "name": "range list",
+    "domain": "collections",
+    "operands": ["D:dest", "S:start", "S:end"],
+    "python": "{dest} = list(range({start}, {end} + 1))"
+  },
+
+  "701": {
+    "path": "7.0.1",
+    "name": "add",
+    "domain": "math",
+    "operands": ["D:dest", "S:a", "S:b"],
+    "python": "{dest} = rt.add({a}, {b})"
+  },
+  "702": {
+    "path": "7.0.2",
+    "name": "subtract",
+    "domain": "math",
+    "operands": ["D:dest", "S:a", "S:b"],
+    "python": "{dest} = rt.sub({a}, {b})"
+  },
+  "703": {
+    "path": "7.0.3",
+    "name": "multiply",
+    "domain": "math",
+    "operands": ["D:dest", "S:a", "S:b"],
+    "python": "{dest} = rt.mul({a}, {b})"
+  },
+  "704": {
+    "path": "7.0.4",
+    "name": "divide",
+    "domain": "math",
+    "operands": ["D:dest", "S:a", "S:b"],
+    "python": "{dest} = rt.div({a}, {b})"
+  },
+  "705": {
+    "path": "7.0.5",
+    "name": "dot product",
+    "domain": "math",
+    "operands": ["D:dest", "S:a", "S:b"],
+    "python": "{dest} = rt.dot({a}, {b})"
+  },
+  "706": {
+    "path": "7.0.6",
+    "name": "modulo",
+    "domain": "math",
+    "operands": ["D:dest", "S:a", "S:b"],
+    "python": "{dest} = {a} % {b}"
+  },
+  "707": {
+    "path": "7.0.7",
+    "name": "power",
+    "domain": "math",
+    "operands": ["D:dest", "S:a", "S:b"],
+    "python": "{dest} = rt.pow({a}, {b})"
+  },
+  "708": {
+    "path": "7.0.8",
+    "name": "negate",
+    "domain": "math",
+    "operands": ["D:dest", "S:a"],
+    "python": "{dest} = rt.neg({a})"
+  },
+  "711": {
+    "path": "7.1.1",
+    "name": "equal",
+    "domain": "logic",
+    "operands": ["D:dest", "S:a", "S:b"],
+    "python": "{dest} = {a} == {b}"
+  },
+  "712": {
+    "path": "7.1.2",
+    "name": "not equal",
+    "domain": "logic",
+    "operands": ["D:dest", "S:a", "S:b"],
+    "python": "{dest} = {a} != {b}"
+  },
+  "713": {
+    "path": "7.1.3",
+    "name": "less than",
+    "domain": "logic",
+    "operands": ["D:dest", "S:a", "S:b"],
+    "python": "{dest} = {a} < {b}"
+  },
+  "714": {
+    "path": "7.1.4",
+    "name": "less or equal",
+    "domain": "logic",
+    "operands": ["D:dest", "S:a", "S:b"],
+    "python": "{dest} = {a} <= {b}"
+  },
+  "715": {
+    "path": "7.1.5",
+    "name": "greater than",
+    "domain": "logic",
+    "operands": ["D:dest", "S:a", "S:b"],
+    "python": "{dest} = {a} > {b}"
+  },
+  "716": {
+    "path": "7.1.6",
+    "name": "greater or equal",
+    "domain": "logic",
+    "operands": ["D:dest", "S:a", "S:b"],
+    "python": "{dest} = {a} >= {b}"
+  },
+  "721": {
+    "path": "7.2.1",
+    "name": "and",
+    "domain": "logic",
+    "operands": ["D:dest", "S:a", "S:b"],
+    "python": "{dest} = {a} and {b}"
+  },
+  "722": {
+    "path": "7.2.2",
+    "name": "or",
+    "domain": "logic",
+    "operands": ["D:dest", "S:a", "S:b"],
+    "python": "{dest} = {a} or {b}"
+  },
+  "723": {
+    "path": "7.2.3",
+    "name": "not",
+    "domain": "logic",
+    "operands": ["D:dest", "S:a"],
+    "python": "{dest} = not {a}"
+  },
+  "731": {
+    "path": "7.3.1",
+    "name": "square root",
+    "domain": "math",
+    "operands": ["D:dest", "S:a"],
+    "python": "{dest} = rt.sqrt({a})"
+  },
+  "732": {
+    "path": "7.3.2",
+    "name": "exp",
+    "domain": "math",
+    "operands": ["D:dest", "S:a"],
+    "python": "{dest} = rt.exp({a})"
+  },
+  "733": {
+    "path": "7.3.3",
+    "name": "log",
+    "domain": "math",
+    "operands": ["D:dest", "S:a"],
+    "python": "{dest} = rt.log({a})"
+  },
+  "734": {
+    "path": "7.3.4",
+    "name": "abs",
+    "domain": "math",
+    "operands": ["D:dest", "S:a"],
+    "python": "{dest} = rt.abs({a})"
+  },
+  "735": {
+    "path": "7.3.5",
+    "name": "sum",
+    "domain": "math",
+    "operands": ["D:dest", "S:a"],
+    "python": "{dest} = rt.sum({a})"
+  },
+  "736": {
+    "path": "7.3.6",
+    "name": "max",
+    "domain": "math",
+    "operands": ["D:dest", "S:a"],
+    "python": "{dest} = rt.max({a})"
+  },
+  "737": {
+    "path": "7.3.7",
+    "name": "min",
+    "domain": "math",
+    "operands": ["D:dest", "S:a"],
+    "python": "{dest} = rt.min({a})"
+  },
+  "738": {
+    "path": "7.3.8",
+    "name": "mean",
+    "domain": "math",
+    "operands": ["D:dest", "S:a"],
+    "python": "{dest} = rt.mean({a})"
+  },
+  "741": {
+    "path": "7.4.1",
+    "name": "to integer",
+    "domain": "conversion",
+    "operands": ["D:dest", "S:a"],
+    "python": "{dest} = int({a})"
+  },
+  "742": {
+    "path": "7.4.2",
+    "name": "to decimal",
+    "domain": "conversion",
+    "operands": ["D:dest", "S:a"],
+    "python": "{dest} = float({a})"
+  },
+  "743": {
+    "path": "7.4.3",
+    "name": "to text",
+    "domain": "conversion",
+    "operands": ["D:dest", "S:a"],
+    "python": "{dest} = str({a})"
+  },
+
+  "801": {
+    "path": "8.0.1",
+    "name": "input",
+    "domain": "io",
+    "operands": ["D:dest", "[S:prompt]"],
+    "python": "{dest} = input({prompt})"
+  },
+  "802": {
+    "path": "8.0.2",
+    "name": "output",
+    "domain": "io",
+    "operands": ["...S:values"],
+    "python": "print({values})"
+  },
+  "803": {
+    "path": "8.0.3",
+    "name": "read file",
+    "domain": "io",
+    "operands": ["D:dest", "S:path"],
+    "python": "{dest} = rt.read_file({path})",
+    "permissions": ["files"]
+  },
+  "804": {
+    "path": "8.0.4",
+    "name": "network fetch",
+    "domain": "io",
+    "operands": ["D:dest", "S:url"],
+    "python": "{dest} = rt.fetch({url})",
+    "permissions": ["network"]
+  },
+  "805": {
+    "path": "8.0.5",
+    "name": "write file",
+    "domain": "io",
+    "operands": ["S:path", "S:value"],
+    "python": "rt.write_file({path}, {value})",
+    "permissions": ["files"]
+  },
+
+  "900": {
+    "path": "9.0.0",
+    "name": "version",
+    "domain": "system",
+    "operands": ["L:major", "[L:minor]"],
+    "python": "pass"
+  },
+  "901": {
+    "path": "9.0.1",
+    "name": "halt",
+    "domain": "system",
+    "operands": ["[L:code]"],
+    "python": "raise SystemExit({code})"
+  },
+  "902": {
+    "path": "9.0.2",
+    "name": "assert",
+    "domain": "system",
+    "operands": ["S:cond", "[S:message]"],
+    "python": "assert {cond}, {message}"
+  },
+  "903": {
+    "path": "9.0.3",
+    "name": "require registry",
+    "domain": "system",
+    "operands": ["L:registry_id"],
+    "python": "rt.load_registry({registry_id})"
+  },
+  "904": {
+    "path": "9.0.4",
+    "name": "seed",
+    "domain": "system",
+    "operands": ["L:seed"],
+    "python": "rt.seed({seed})"
+  },
+  "909": {
+    "path": "9.0.9",
+    "name": "debug dump",
+    "domain": "system",
+    "operands": [],
+    "python": "rt.dump(locals())"
+  }
+}

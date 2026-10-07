@@ -1,12 +1,29 @@
 import * as vscode from 'vscode';
-import { exec } from 'child_process';
+import { exec, ChildProcess } from 'child_process';
 import * as path from 'path';
+import { ToolchainResolver } from './toolchain';
+
+interface StructuredDiag {
+    code: string;
+    message: string;
+    line?: number;
+    column?: number;
+    severity?: string;
+    location?: string;
+    source_text?: string;
+}
+
+interface StructuredResult {
+    ok: boolean;
+    diagnostics?: StructuredDiag[];
+}
 
 export class DiagnosticsManager {
     private diagnosticCollection: vscode.DiagnosticCollection;
     private timeoutMap: Map<string, NodeJS.Timeout> = new Map();
+    private activeProcesses: Map<string, ChildProcess> = new Map();
 
-    constructor() {
+    constructor(private resolver: ToolchainResolver) {
         this.diagnosticCollection = vscode.languages.createDiagnosticCollection('plan-and-ndot');
     }
 
@@ -18,7 +35,7 @@ export class DiagnosticsManager {
             this.runDiagnostics(doc);
         }, null, context.subscriptions);
 
-        // Run diagnostics on document save
+        // Run diagnostics on document save (default: true)
         vscode.workspace.onDidSaveTextDocument(doc => {
             const config = vscode.workspace.getConfiguration('planAndNdot');
             if (config.get<boolean>('diagnosticsOnSave', true)) {
@@ -26,8 +43,13 @@ export class DiagnosticsManager {
             }
         }, null, context.subscriptions);
 
-        // Debounced diagnostics on document change
+        // Live diagnostics on document change (default: false, debounced 600ms)
         vscode.workspace.onDidChangeTextDocument(event => {
+            const config = vscode.workspace.getConfiguration('planAndNdot');
+            if (!config.get<boolean>('diagnosticsOnChange', false)) {
+                return;
+            }
+
             const doc = event.document;
             const docUri = doc.uri.toString();
             if (this.timeoutMap.has(docUri)) {
@@ -42,6 +64,15 @@ export class DiagnosticsManager {
 
         // Clear diagnostics when document is closed
         vscode.workspace.onDidCloseTextDocument(doc => {
+            const docUri = doc.uri.toString();
+            if (this.timeoutMap.has(docUri)) {
+                clearTimeout(this.timeoutMap.get(docUri)!);
+                this.timeoutMap.delete(docUri);
+            }
+            if (this.activeProcesses.has(docUri)) {
+                this.activeProcesses.get(docUri)!.kill();
+                this.activeProcesses.delete(docUri);
+            }
             this.diagnosticCollection.delete(doc.uri);
         }, null, context.subscriptions);
 
@@ -59,32 +90,92 @@ export class DiagnosticsManager {
         const cwd = workspaceFolder ? workspaceFolder.uri.fsPath : path.dirname(document.fileName);
 
         if (ext === '.plan') {
-            this.checkPlan(document, cwd);
+            this.checkLanguage(document, cwd, 'plan');
         } else if (ext === '.ndot') {
-            this.checkNdot(document, cwd);
+            this.checkLanguage(document, cwd, 'ndot');
         }
     }
 
-    private checkPlan(document: vscode.TextDocument, cwd: string): void {
-        const config = vscode.workspace.getConfiguration('plan');
-        const pythonPath = config.get<string>('pythonPath', 'python');
-        const cmd = `"${pythonPath}" -m plan.cli check "${document.fileName}"`;
+    private checkLanguage(document: vscode.TextDocument, cwd: string, lang: 'plan' | 'ndot'): void {
+        const docUri = document.uri.toString();
 
-        exec(cmd, { cwd }, (error, stdout, stderr) => {
+        // Kill any in-flight check process for this document
+        if (this.activeProcesses.has(docUri)) {
+            try {
+                this.activeProcesses.get(docUri)!.kill();
+            } catch (_) {}
+            this.activeProcesses.delete(docUri);
+        }
+
+        const pythonPath = this.resolver.getPythonPath(lang);
+        const toolchain = lang === 'plan' ? this.resolver.getPlanCli(cwd) : this.resolver.getNdotCli(cwd);
+        const cmd = `"${pythonPath}" "${toolchain.cliPath}" check "${document.fileName}" --json`;
+
+        const child = exec(cmd, { cwd, env: toolchain.env }, (error, stdout, stderr) => {
+            this.activeProcesses.delete(docUri);
             const diagnostics: vscode.Diagnostic[] = [];
-            const output = (stderr || stdout || '').trim();
+            const rawOutput = (stdout || stderr || '').trim();
 
-            if (error && output) {
-                // Parse PLAN error formats:
-                // Format 1: Compile Error: <message> at line <line>, column <col>
-                // Format 2: <line>: error <CODE> at col <col>: <message>
-                const match1 = output.match(/Compile Error:\s*(?:(\d+):\s*error\s*([A-Z0-9]+)\s*at\s*col\s*(\d+):\s*)?(.*)/i);
-                const match2 = output.match(/at line (\d+)(?:,\s*column\s*(\d+))?/i);
+            if (!rawOutput) {
+                this.diagnosticCollection.set(document.uri, []);
+                return;
+            }
+
+            // 1. Try structured JSON diagnostics from compiler
+            let parsedJson: StructuredResult | null = null;
+            try {
+                parsedJson = JSON.parse(rawOutput);
+            } catch (_) {
+                // If output has extra prefix text before json, find first '{'
+                const firstBrace = rawOutput.indexOf('{');
+                if (firstBrace !== -1) {
+                    try {
+                        parsedJson = JSON.parse(rawOutput.slice(firstBrace));
+                    } catch (_) {}
+                }
+            }
+
+            if (parsedJson && Array.isArray(parsedJson.diagnostics)) {
+                for (const item of parsedJson.diagnostics) {
+                    const lineIndex = Math.max(0, (item.line || 1) - 1);
+                    const colIndex = Math.max(0, (item.column || 1) - 1);
+                    const lineText = document.lineCount > lineIndex ? document.lineAt(lineIndex).text : '';
+
+                    // Find precise token bounds starting at colIndex
+                    let endColIndex = colIndex + 1;
+                    while (endColIndex < lineText.length && !/[\s.,;:()[\]{}]/.test(lineText[endColIndex])) {
+                        endColIndex++;
+                    }
+
+                    const range = new vscode.Range(
+                        lineIndex,
+                        colIndex,
+                        lineIndex,
+                        Math.max(endColIndex, colIndex + 1)
+                    );
+
+                    const severity = item.severity === 'warning'
+                        ? vscode.DiagnosticSeverity.Warning
+                        : vscode.DiagnosticSeverity.Error;
+
+                    const diag = new vscode.Diagnostic(range, item.message, severity);
+                    diag.code = item.code;
+                    diag.source = lang;
+                    diagnostics.push(diag);
+                }
+                this.diagnosticCollection.set(document.uri, diagnostics);
+                return;
+            }
+
+            // 2. Fallback regex parser for legacy or raw error output
+            if (error && rawOutput) {
+                const match1 = rawOutput.match(/(?:Compile Error:\s*)?(?:(\d+):\s*error\s*)?([A-Z0-9]+)?(?:\s*at\s*col\s*(\d+))?:\s*(.*)/i);
+                const match2 = rawOutput.match(/at line (\d+)(?:,\s*column\s*(\d+))?/i);
 
                 let lineNum = 1;
                 let colNum = 1;
-                let code = 'PLAN';
-                let message = output;
+                let code = lang.toUpperCase();
+                let message = rawOutput;
 
                 if (match1) {
                     if (match1[1]) lineNum = parseInt(match1[1], 10);
@@ -92,7 +183,6 @@ export class DiagnosticsManager {
                     if (match1[3]) colNum = parseInt(match1[3], 10);
                     if (match1[4]) message = match1[4].trim();
                 }
-
                 if (match2) {
                     lineNum = parseInt(match2[1], 10);
                     if (match2[2]) colNum = parseInt(match2[2], 10);
@@ -108,68 +198,15 @@ export class DiagnosticsManager {
                     Math.max(colIndex + 1, lineText.length)
                 );
 
-                const diagnostic = new vscode.Diagnostic(
-                    range,
-                    message,
-                    vscode.DiagnosticSeverity.Error
-                );
-                diagnostic.code = code;
-                diagnostic.source = 'plan';
-                diagnostics.push(diagnostic);
+                const diag = new vscode.Diagnostic(range, message, vscode.DiagnosticSeverity.Error);
+                diag.code = code;
+                diag.source = lang;
+                diagnostics.push(diag);
             }
 
             this.diagnosticCollection.set(document.uri, diagnostics);
         });
-    }
 
-    private checkNdot(document: vscode.TextDocument, cwd: string): void {
-        const config = vscode.workspace.getConfiguration('ndot');
-        const pythonPath = config.get<string>('pythonPath', 'python');
-        const cmd = `"${pythonPath}" -m ndot.cli check "${document.fileName}"`;
-
-        exec(cmd, { cwd }, (error, stdout, stderr) => {
-            const diagnostics: vscode.Diagnostic[] = [];
-            const output = (stderr || stdout || '').trim();
-
-            if (error && output) {
-                // Parse N-DOT error formats:
-                // Format: Compile Error: <line>: error <CODE> at col <col>: <message>
-                // Or: <CODE> at instruction <inst> (char <char>): <message>
-                const diagMatch = output.match(/(?:Compile Error:\s*)?(?:(\d+):\s*error\s*)?([N][0-9]{3})(?:\s*at\s*col\s*(\d+))?:\s*(.*)/i);
-                
-                let lineNum = 1;
-                let colNum = 1;
-                let code = 'N-DOT';
-                let message = output;
-
-                if (diagMatch) {
-                    if (diagMatch[1]) lineNum = parseInt(diagMatch[1], 10);
-                    if (diagMatch[2]) code = diagMatch[2];
-                    if (diagMatch[3]) colNum = parseInt(diagMatch[3], 10);
-                    if (diagMatch[4]) message = diagMatch[4].trim();
-                }
-
-                const lineIndex = Math.max(0, lineNum - 1);
-                const colIndex = Math.max(0, colNum - 1);
-                const lineText = document.lineCount > lineIndex ? document.lineAt(lineIndex).text : '';
-                const range = new vscode.Range(
-                    lineIndex,
-                    colIndex,
-                    lineIndex,
-                    Math.max(colIndex + 1, lineText.length)
-                );
-
-                const diagnostic = new vscode.Diagnostic(
-                    range,
-                    message,
-                    vscode.DiagnosticSeverity.Error
-                );
-                diagnostic.code = code;
-                diagnostic.source = 'ndot';
-                diagnostics.push(diagnostic);
-            }
-
-            this.diagnosticCollection.set(document.uri, diagnostics);
-        });
+        this.activeProcesses.set(docUri, child);
     }
 }

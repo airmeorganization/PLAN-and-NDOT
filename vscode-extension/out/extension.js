@@ -36,18 +36,21 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.activate = activate;
 exports.deactivate = deactivate;
 const vscode = __importStar(require("vscode"));
+const toolchain_1 = require("./toolchain");
 const plan_1 = require("./plan");
 const ndot_1 = require("./ndot");
 const diagnostics_1 = require("./diagnostics");
 function activate(context) {
     console.log('PLAN & N-DOT extension is now active.');
+    // Toolchain Resolver (handles local workspace vs bundled compiler)
+    const resolver = new toolchain_1.ToolchainResolver(context);
     // Controllers
-    const planController = new plan_1.PlanController();
+    const planController = new plan_1.PlanController(resolver);
     planController.registerCommands(context);
-    const ndotController = new ndot_1.NdotController();
+    const ndotController = new ndot_1.NdotController(resolver);
     ndotController.registerCommands(context);
     // Diagnostics
-    const diagnosticsManager = new diagnostics_1.DiagnosticsManager();
+    const diagnosticsManager = new diagnostics_1.DiagnosticsManager(resolver);
     diagnosticsManager.register(context);
     // Status Bar Item
     const statusBarItem = vscode.window.createStatusBarItem(vscode.StatusBarAlignment.Right, 100);

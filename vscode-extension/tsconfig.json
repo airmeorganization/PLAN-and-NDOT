@@ -10,7 +10,11 @@
     "noImplicitAny": false,
     "skipLibCheck": true,
     "esModuleInterop": true,
-    "types": ["node", "vscode"]
+    "types": ["node", "vscode"],
+    "typeRoots": [
+      "./node_modules/@types",
+      "C:/Users/HP/AppData/Roaming/npm/node_modules/@types"
+    ]
   },
-  "exclude": ["node_modules", ".vscode-test"]
+  "exclude": ["node_modules", ".vscode-test", "compiler"]
 }

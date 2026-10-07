@@ -1,11 +1,12 @@
 import * as vscode from 'vscode';
 import { exec } from 'child_process';
 import * as path from 'path';
+import { ToolchainResolver } from './toolchain';
 
 export class PlanController {
     private outputChannel: vscode.OutputChannel;
 
-    constructor() {
+    constructor(private resolver: ToolchainResolver) {
         this.outputChannel = vscode.window.createOutputChannel('PLAN Toolchain');
     }
 
@@ -43,15 +44,17 @@ export class PlanController {
         if (!fileInfo) return;
 
         const config = vscode.workspace.getConfiguration('plan');
-        const pythonPath = config.get<string>('pythonPath', 'python');
+        const pythonPath = this.resolver.getPythonPath('plan');
+        const toolchain = this.resolver.getPlanCli(fileInfo.cwd);
+
         const allowPython = config.get<boolean>('allowPython', false) ? ' --allow-python' : '';
         const allowAllModules = config.get<boolean>('allowAllModules', false) ? ' --allow-all-modules' : '';
 
-        const cmd = `"${pythonPath}" -m plan.cli run "${fileInfo.filePath}"${allowPython}${allowAllModules}`;
+        const cmd = `"${pythonPath}" "${toolchain.cliPath}" run "${fileInfo.filePath}"${allowPython}${allowAllModules}`;
 
         let terminal = vscode.window.terminals.find(t => t.name === 'PLAN');
         if (!terminal) {
-            terminal = vscode.window.createTerminal({ name: 'PLAN', cwd: fileInfo.cwd });
+            terminal = vscode.window.createTerminal({ name: 'PLAN', cwd: fileInfo.cwd, env: toolchain.env });
         }
         terminal.show();
         terminal.sendText(cmd);
@@ -61,8 +64,8 @@ export class PlanController {
         const fileInfo = this.getTargetFile(uri);
         if (!fileInfo) return;
 
-        const config = vscode.workspace.getConfiguration('plan');
-        const pythonPath = config.get<string>('pythonPath', 'python');
+        const pythonPath = this.resolver.getPythonPath('plan');
+        const toolchain = this.resolver.getPlanCli(fileInfo.cwd);
         const defaultOut = fileInfo.filePath.replace(/\.plan$/, '.py');
 
         vscode.window.showInputBox({
@@ -71,11 +74,11 @@ export class PlanController {
         }).then(outPath => {
             if (!outPath) return;
 
-            const cmd = `"${pythonPath}" -m plan.cli build "${fileInfo.filePath}" -o "${outPath}"`;
+            const cmd = `"${pythonPath}" "${toolchain.cliPath}" build "${fileInfo.filePath}" -o "${outPath}"`;
             this.outputChannel.show(true);
             this.outputChannel.appendLine(`[PLAN Build] ${cmd}`);
 
-            exec(cmd, { cwd: fileInfo.cwd }, (error, stdout, stderr) => {
+            exec(cmd, { cwd: fileInfo.cwd, env: toolchain.env }, (error, stdout, stderr) => {
                 if (error) {
                     this.outputChannel.appendLine(`[Error] ${stderr || stdout}`);
                     vscode.window.showErrorMessage(`PLAN build failed: ${stderr || stdout}`);
@@ -91,11 +94,11 @@ export class PlanController {
         const fileInfo = this.getTargetFile(uri);
         if (!fileInfo) return;
 
-        const config = vscode.workspace.getConfiguration('plan');
-        const pythonPath = config.get<string>('pythonPath', 'python');
-        const cmd = `"${pythonPath}" -m plan.cli check "${fileInfo.filePath}"`;
+        const pythonPath = this.resolver.getPythonPath('plan');
+        const toolchain = this.resolver.getPlanCli(fileInfo.cwd);
+        const cmd = `"${pythonPath}" "${toolchain.cliPath}" check "${fileInfo.filePath}"`;
 
-        exec(cmd, { cwd: fileInfo.cwd }, (error, stdout, stderr) => {
+        exec(cmd, { cwd: fileInfo.cwd, env: toolchain.env }, (error, stdout, stderr) => {
             if (error) {
                 vscode.window.showErrorMessage(`PLAN Check Failed: ${(stderr || stdout).trim()}`);
             } else {
@@ -108,11 +111,11 @@ export class PlanController {
         const fileInfo = this.getTargetFile(uri);
         if (!fileInfo) return;
 
-        const config = vscode.workspace.getConfiguration('plan');
-        const pythonPath = config.get<string>('pythonPath', 'python');
-        const cmd = `"${pythonPath}" -m plan.cli python "${fileInfo.filePath}"`;
+        const pythonPath = this.resolver.getPythonPath('plan');
+        const toolchain = this.resolver.getPlanCli(fileInfo.cwd);
+        const cmd = `"${pythonPath}" "${toolchain.cliPath}" python "${fileInfo.filePath}"`;
 
-        exec(cmd, { cwd: fileInfo.cwd }, (error, stdout, stderr) => {
+        exec(cmd, { cwd: fileInfo.cwd, env: toolchain.env }, (error, stdout, stderr) => {
             if (error) {
                 vscode.window.showErrorMessage(`PLAN codegen failed: ${(stderr || stdout).trim()}`);
             } else {
