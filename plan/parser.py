@@ -304,13 +304,18 @@ class Parser:
             kind = 'number'
         elif self.match_words('for', 'a', 'whole', 'number', 'with'):
             kind = 'whole_number'
+        elif self.match_word('with'):
+            kind = 'text'
 
         prompt_expr = self.parse_expr()
         self.consume_word('and')
         self.consume_word('store')
-        if self.peek().value == 'the':
-            self.next_token()
-        self.consume_word('answer')
+        if self.match_words('the', 'answer'):
+            pass
+        elif self.match_word('the'):
+            self.consume_word('answer')
+        elif self.match_word('answer'):
+            pass
         self.consume_word('in')
         target_tok = self.consume_ident()
         self.consume('PERIOD')
@@ -522,7 +527,11 @@ class Parser:
 
     def parse_and(self) -> Expr:
         left = self.parse_not()
-        while self.match_word('and'):
+        while self.peek().value == 'and':
+            # Do not consume 'and' if followed by statement connectors like 'store' or 'gives'
+            if self.peek_next().value in ('store', 'gives'):
+                break
+            self.next_token() # consume 'and'
             right = self.parse_not()
             left = BinaryOp(line=left.line, column=left.column, left=left, op='and', right=right)
         return left

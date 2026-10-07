@@ -56,5 +56,25 @@ class TestPlanCompiler(unittest.TestCase):
         py_code = pyast.unparse(mod)
         self.assertIn('def calc(x: float, y: int) -> bool:', py_code)
 
+    def test_ask_and_try_codegen(self):
+        code = (
+            'Create a variable called total with value 0.\n'
+            'Repeat 3 times,\n'
+            '    Try,\n'
+            '        Ask for a number with "Enter a number: " and store the answer in n.\n'
+            '        Add n to total.\n'
+            '    On failure,\n'
+            '        show "That was not a number, skipping.".\n'
+            'Show "Total: " followed by total.\n'
+        )
+        tokens = Lexer(code).tokenize()
+        ast = Parser(tokens).parse_program()
+        SemanticAnalyzer().analyze(ast)
+        mod = Codegen().generate(ast)
+        py_code = pyast.unparse(mod)
+        self.assertIn("plan_rt.to_number(input('Enter a number: '))", py_code)
+        self.assertIn("print('That was not a number, skipping.')", py_code)
+        self.assertIn("total += n", py_code)
+
 if __name__ == '__main__':
     unittest.main()
