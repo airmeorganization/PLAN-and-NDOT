@@ -69,7 +69,7 @@ ndot asm    model.ndasm         # mnemonic listing → numeric source (debug aid
 ### 3.1 Active v0.1 implementation tree
 
 ```text
-ao-languages/
+PLAN-and-NDOT/
 ├── plan/
 │   ├── lexer.py          # sentences, strings, numbers, indentation
 │   ├── parser.py         # controlled-English grammar → AST
@@ -92,6 +92,21 @@ ao-languages/
 │   ├── diagnostics.py    # shared Diagnostic and CompileError reporting
 │   ├── sourcemap.py      # line mapping
 │   └── sandbox.py        # sandbox permissions & module allow-lists
+├── tests/
+│   ├── test_plan.py      # PLAN compiler & semantic unit tests
+│   └── test_ndot.py      # N-DOT validator & runtime unit tests
+├── vscode-extension/
+│   ├── src/
+│   │   ├── extension.ts  # extension activation & command registration
+│   │   ├── plan.ts       # PLAN execution, build, and Python preview
+│   │   ├── ndot.ts       # N-DOT execution, build, disasm, and asm
+│   │   └── diagnostics.ts# real-time linter for .plan and .ndot
+│   ├── syntaxes/
+│   │   ├── plan.tmLanguage.json # TextMate grammar for PLAN
+│   │   └── ndot.tmLanguage.json # TextMate grammar for N-DOT & .ndasm
+│   ├── language-configuration.json
+│   ├── package.json
+│   └── README.md
 └── spec/
     ├── PLAN.md           # PLAN language specification
     └── NDOT.md           # N-DOT specification

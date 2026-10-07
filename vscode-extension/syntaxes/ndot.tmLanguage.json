@@ -1,0 +1,161 @@
+{
+  "$schema": "https://raw.githubusercontent.com/martinring/tmlanguage/master/tmlanguage.json",
+  "name": "N-DOT",
+  "scopeName": "source.ndot",
+  "patterns": [
+    { "include": "#comments" },
+    { "include": "#strings" },
+    { "include": "#registers" },
+    { "include": "#functions" },
+    { "include": "#mnemonics" },
+    { "include": "#opcodes" },
+    { "include": "#terminator" },
+    { "include": "#numbers" },
+    { "include": "#delimiters" }
+  ],
+  "repository": {
+    "comments": {
+      "patterns": [
+        {
+          "name": "comment.line.number-sign.ndot",
+          "match": "#.*$"
+        }
+      ]
+    },
+    "strings": {
+      "patterns": [
+        {
+          "name": "string.quoted.double.ndot",
+          "begin": "\"",
+          "end": "\"",
+          "patterns": [
+            {
+              "name": "constant.character.escape.ndot",
+              "match": "\\\\."
+            }
+          ]
+        }
+      ]
+    },
+    "registers": {
+      "patterns": [
+        {
+          "name": "variable.language.slot.ndot",
+          "match": "\\bs\\d+\\b"
+        }
+      ]
+    },
+    "functions": {
+      "patterns": [
+        {
+          "name": "entity.name.function.ndot",
+          "match": "\\bf\\d+\\b"
+        }
+      ]
+    },
+    "mnemonics": {
+      "patterns": [
+        {
+          "name": "keyword.control.system.ndasm",
+          "match": "\\b(version|halt|assert|require_registry|seed|debug_dump)\\b"
+        },
+        {
+          "name": "keyword.control.flow.ndasm",
+          "match": "\\b(if|while|repeat|stop|next|otherwise|for_range|for_each|end_block|define_function|return|call)\\b"
+        },
+        {
+          "name": "support.class.model.ndasm",
+          "match": "\\b(create_model|load_model|inference|train|evaluate|save_model|parameters)\\b"
+        },
+        {
+          "name": "support.class.tensor.ndasm",
+          "match": "\\b(tensor|vector|matrix|reshape|normalize|zeros|ones|random|shape|matmul|transpose|to_list)\\b"
+        },
+        {
+          "name": "support.function.neural.ndasm",
+          "match": "\\b(linear|conv1d|attention|activation|embedding|layer_norm|loss)\\b"
+        },
+        {
+          "name": "support.class.dataset.ndasm",
+          "match": "\\b(dataset|batch|sample|shuffle|split|load_csv|size)\\b"
+        },
+        {
+          "name": "support.function.memory.ndasm",
+          "match": "\\b(store|load_persistent|cache_persistent|delete|positive_integer|negative_integer|zero|positive_decimal|negative_decimal|text|true|false|nothing|list|append|get_item|set_item|length|dictionary|set_key|get_key|range_list)\\b"
+        },
+        {
+          "name": "keyword.operator.math.ndasm",
+          "match": "\\b(add|subtract|multiply|divide|dot_product|modulo|power|negate|equal|not_equal|less_than|less_or_equal|greater_than|greater_or_equal|and|or|not|sqrt|exp|log|abs|sum|max|min|mean|to_integer|to_decimal|to_text)\\b"
+        },
+        {
+          "name": "support.function.io.ndasm",
+          "match": "\\b(input|output|read_file|network_fetch|write_file)\\b"
+        }
+      ]
+    },
+    "opcodes": {
+      "patterns": [
+        {
+          "name": "keyword.control.system.ndot",
+          "match": "\\b9\\d{2}\\b"
+        },
+        {
+          "name": "keyword.control.flow.ndot",
+          "match": "\\b5\\d{2}\\b"
+        },
+        {
+          "name": "support.class.model.ndot",
+          "match": "\\b1\\d{2}\\b"
+        },
+        {
+          "name": "support.class.tensor.ndot",
+          "match": "\\b2\\d{2}\\b"
+        },
+        {
+          "name": "support.function.neural.ndot",
+          "match": "\\b3\\d{2}\\b"
+        },
+        {
+          "name": "support.class.dataset.ndot",
+          "match": "\\b4\\d{2}\\b"
+        },
+        {
+          "name": "constant.numeric.memory.ndot",
+          "match": "\\b6\\d{2}\\b"
+        },
+        {
+          "name": "keyword.operator.math.ndot",
+          "match": "\\b7\\d{2}\\b"
+        },
+        {
+          "name": "support.function.io.ndot",
+          "match": "\\b8\\d{2}\\b"
+        }
+      ]
+    },
+    "terminator": {
+      "patterns": [
+        {
+          "name": "constant.language.terminator.ndot",
+          "match": "\\.0(?=\\.|$|\\s)"
+        }
+      ]
+    },
+    "numbers": {
+      "patterns": [
+        {
+          "name": "constant.numeric.integer.ndot",
+          "match": "\\b\\d+\\b"
+        }
+      ]
+    },
+    "delimiters": {
+      "patterns": [
+        {
+          "name": "punctuation.separator.dot.ndot",
+          "match": "\\."
+        }
+      ]
+    }
+  }
+}

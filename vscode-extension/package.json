@@ -1,0 +1,194 @@
+{
+  "name": "plan-and-ndot",
+  "displayName": "PLAN & N-DOT Language Support",
+  "description": "Language support, syntax highlighting, diagnostics, compilation, and execution for PLAN (Plain Language) and N-DOT (Neural-DOT).",
+  "version": "0.1.0",
+  "publisher": "airmeorganization",
+  "license": "MIT",
+  "engines": {
+    "vscode": "^1.75.0"
+  },
+  "categories": [
+    "Programming Languages",
+    "Linters",
+    "Snippets"
+  ],
+  "keywords": [
+    "plan",
+    "ndot",
+    "controlled-english",
+    "neural",
+    "compiler"
+  ],
+  "main": "./out/extension.js",
+  "activationEvents": [
+    "onLanguage:plan",
+    "onLanguage:ndot",
+    "onLanguage:ndasm"
+  ],
+  "contributes": {
+    "languages": [
+      {
+        "id": "plan",
+        "aliases": ["PLAN", "plan"],
+        "extensions": [".plan"],
+        "configuration": "./language-configuration.json"
+      },
+      {
+        "id": "ndot",
+        "aliases": ["N-DOT", "ndot"],
+        "extensions": [".ndot"],
+        "configuration": "./language-configuration.json"
+      },
+      {
+        "id": "ndasm",
+        "aliases": ["N-DOT Assembly", "ndasm"],
+        "extensions": [".ndasm"],
+        "configuration": "./language-configuration.json"
+      }
+    ],
+    "grammars": [
+      {
+        "language": "plan",
+        "scopeName": "source.plan",
+        "path": "./syntaxes/plan.tmLanguage.json"
+      },
+      {
+        "language": "ndot",
+        "scopeName": "source.ndot",
+        "path": "./syntaxes/ndot.tmLanguage.json"
+      },
+      {
+        "language": "ndasm",
+        "scopeName": "source.ndot",
+        "path": "./syntaxes/ndot.tmLanguage.json"
+      }
+    ],
+    "commands": [
+      {
+        "command": "plan.run",
+        "title": "PLAN: Run Program",
+        "icon": "$(play)"
+      },
+      {
+        "command": "plan.build",
+        "title": "PLAN: Build to Python",
+        "icon": "$(gear)"
+      },
+      {
+        "command": "plan.check",
+        "title": "PLAN: Check Semantics",
+        "icon": "$(check)"
+      },
+      {
+        "command": "plan.toPython",
+        "title": "PLAN: Preview Generated Python",
+        "icon": "$(file-code)"
+      },
+      {
+        "command": "ndot.run",
+        "title": "N-DOT: Run Program",
+        "icon": "$(play)"
+      },
+      {
+        "command": "ndot.build",
+        "title": "N-DOT: Build to Python",
+        "icon": "$(gear)"
+      },
+      {
+        "command": "ndot.check",
+        "title": "N-DOT: Check Program",
+        "icon": "$(check)"
+      },
+      {
+        "command": "ndot.disassemble",
+        "title": "N-DOT: Disassemble to .ndasm",
+        "icon": "$(symbol-numeric)"
+      },
+      {
+        "command": "ndot.assemble",
+        "title": "N-DOT: Assemble to .ndot",
+        "icon": "$(symbol-misc)"
+      }
+    ],
+    "menus": {
+      "editor/title": [
+        {
+          "command": "plan.run",
+          "group": "navigation",
+          "when": "resourceExtname == .plan"
+        },
+        {
+          "command": "plan.toPython",
+          "group": "navigation",
+          "when": "resourceExtname == .plan"
+        },
+        {
+          "command": "ndot.run",
+          "group": "navigation",
+          "when": "resourceExtname == .ndot || resourceExtname == .ndasm"
+        },
+        {
+          "command": "ndot.disassemble",
+          "group": "navigation",
+          "when": "resourceExtname == .ndot"
+        },
+        {
+          "command": "ndot.assemble",
+          "group": "navigation",
+          "when": "resourceExtname == .ndasm"
+        }
+      ]
+    },
+    "configuration": {
+      "title": "PLAN & N-DOT",
+      "properties": {
+        "plan.pythonPath": {
+          "type": "string",
+          "default": "python",
+          "description": "Path to Python 3 executable for running the PLAN compiler."
+        },
+        "plan.allowPython": {
+          "type": "boolean",
+          "default": false,
+          "description": "Allow raw 'Python:' lines in PLAN programs (--allow-python)."
+        },
+        "plan.allowAllModules": {
+          "type": "boolean",
+          "default": false,
+          "description": "Lift restriction on importing system modules in PLAN (--allow-all-modules)."
+        },
+        "ndot.pythonPath": {
+          "type": "string",
+          "default": "python",
+          "description": "Path to Python 3 executable for running N-DOT toolchain."
+        },
+        "ndot.allowFiles": {
+          "type": "boolean",
+          "default": false,
+          "description": "Allow file operations (803, 805, 406, 102, 106) in N-DOT programs (--allow-files)."
+        },
+        "ndot.allowNetwork": {
+          "type": "boolean",
+          "default": false,
+          "description": "Allow network fetch operations (804) in N-DOT programs (--allow-network)."
+        },
+        "planAndNdot.diagnosticsOnSave": {
+          "type": "boolean",
+          "default": true,
+          "description": "Run check diagnostics automatically on save."
+        }
+      }
+    }
+  },
+  "scripts": {
+    "vscode:prepublish": "npm run compile",
+    "compile": "tsc -p ./",
+    "watch": "tsc -watch -p ./"
+  },
+  "devDependencies": {
+    "@types/node": "^20.11.0",
+    "@types/vscode": "^1.75.0",
+    "typescript": "^5.3.3"
+  }
+}
