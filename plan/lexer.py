@@ -106,6 +106,57 @@ class Lexer:
                 i += len(num_str)
                 continue
 
+            # Math operators (+, *, /, %, **, comparisons)
+            if ch == '+':
+                tokens.append(Token('KEYWORD', 'plus', line_num, col, line_indent, '+'))
+                i += 1
+                continue
+
+            if ch == '*':
+                if i + 1 < n and self.source[i + 1] == '*':
+                    tokens.append(Token('KEYWORD', 'power', line_num, col, line_indent, '**'))
+                    i += 2
+                    continue
+                tokens.append(Token('KEYWORD', 'times', line_num, col, line_indent, '*'))
+                i += 1
+                continue
+
+            if ch == '/':
+                tokens.append(Token('KEYWORD', 'divided_op', line_num, col, line_indent, '/'))
+                i += 1
+                continue
+
+            if ch == '%':
+                tokens.append(Token('KEYWORD', 'modulo', line_num, col, line_indent, '%'))
+                i += 1
+                continue
+
+            if ch in ('=', '!', '<', '>'):
+                if prefix.startswith('=='):
+                    tokens.append(Token('KEYWORD', '==', line_num, col, line_indent, '=='))
+                    i += 2
+                    continue
+                elif prefix.startswith('!='):
+                    tokens.append(Token('KEYWORD', '!=', line_num, col, line_indent, '!='))
+                    i += 2
+                    continue
+                elif prefix.startswith('>='):
+                    tokens.append(Token('KEYWORD', '>=', line_num, col, line_indent, '>='))
+                    i += 2
+                    continue
+                elif prefix.startswith('<='):
+                    tokens.append(Token('KEYWORD', '<=', line_num, col, line_indent, '<='))
+                    i += 2
+                    continue
+                elif ch == '>':
+                    tokens.append(Token('KEYWORD', '>', line_num, col, line_indent, '>'))
+                    i += 1
+                    continue
+                elif ch == '<':
+                    tokens.append(Token('KEYWORD', '<', line_num, col, line_indent, '<'))
+                    i += 1
+                    continue
+
             # Minus sign / dash
             if ch == '-':
                 tokens.append(Token('MINUS', '-', line_num, col, line_indent, '-'))

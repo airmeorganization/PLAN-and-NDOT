@@ -1,0 +1,96 @@
+42
+10000
+20
+test_ndot_1000_instruction_program (test_edge_cases.TestCompilerEdgeCases.test_ndot_1000_instruction_program)
+N-DOT scalability test: Generates and validates a program with 1,000+ instructions. ... ok
+test_ndot_break_outside_loop (test_edge_cases.TestCompilerEdgeCases.test_ndot_break_outside_loop)
+Opcode 504 (break) outside any loop block raises N207. ... ok
+test_ndot_call_undefined_function (test_edge_cases.TestCompilerEdgeCases.test_ndot_call_undefined_function)
+Calling an undeclared function ID raises N208. ... ok
+test_ndot_deeply_nested_blocks (test_edge_cases.TestCompilerEdgeCases.test_ndot_deeply_nested_blocks)
+N-DOT program with 6 levels of nested if/loop blocks. ... ok
+test_ndot_double_dots (test_edge_cases.TestCompilerEdgeCases.test_ndot_double_dots)
+Double dots create empty segments, which are illegal in N-DOT (N102). ... ok
+test_ndot_empty_program_rejected (test_edge_cases.TestCompilerEdgeCases.test_ndot_empty_program_rejected)
+Empty N-DOT string raises N205 (missing version header). ... ok
+test_ndot_extra_close_block (test_edge_cases.TestCompilerEdgeCases.test_ndot_extra_close_block)
+Extra 509 without matching open block raises N204. ... ok
+test_ndot_file_permission_denied (test_edge_cases.TestCompilerEdgeCases.test_ndot_file_permission_denied)
+Attempting file access when allow_files=False raises N303. ... ok
+test_ndot_huge_loop_execution (test_edge_cases.TestCompilerEdgeCases.test_ndot_huge_loop_execution)
+N-DOT loop executing 10,000 iterations to accumulate sum. ... ok
+test_ndot_invalid_enum_activation (test_edge_cases.TestCompilerEdgeCases.test_ndot_invalid_enum_activation)
+Opcode 304 activation code must be 1..6 (N203). ... ok
+test_ndot_invalid_enum_architecture (test_edge_cases.TestCompilerEdgeCases.test_ndot_invalid_enum_architecture)
+Opcode 101 architecture code must be 1, 2, or 3 (N203). ... ok
+test_ndot_invalid_opcode (test_edge_cases.TestCompilerEdgeCases.test_ndot_invalid_opcode)
+Unknown N-DOT opcodes must be rejected (N201). ... ok
+test_ndot_leading_dot (test_edge_cases.TestCompilerEdgeCases.test_ndot_leading_dot)
+Leading dot is an empty segment (N102). ... ok
+test_ndot_leading_zeros (test_edge_cases.TestCompilerEdgeCases.test_ndot_leading_zeros)
+Segments with leading zeros like '05' are forbidden (N103). ... ok
+test_ndot_missing_zero (test_edge_cases.TestCompilerEdgeCases.test_ndot_missing_zero)
+N-DOT programs must end with a trailing '0' terminator (N104). ... ok
+test_ndot_multiple_functions (test_edge_cases.TestCompilerEdgeCases.test_ndot_multiple_functions)
+Multiple N-DOT functions calling each other and returning values. ... ok
+test_ndot_network_permission_denied (test_edge_cases.TestCompilerEdgeCases.test_ndot_network_permission_denied)
+Attempting network fetch when allow_network=False raises N303. ... ok
+test_ndot_return_outside_function (test_edge_cases.TestCompilerEdgeCases.test_ndot_return_outside_function)
+Opcode 511 (return) at top level raises N206. ... ok
+test_ndot_slot_read_before_write (test_edge_cases.TestCompilerEdgeCases.test_ndot_slot_read_before_write)
+Reading a slot that has never been written raises N209. ... ok
+test_ndot_unclosed_block (test_edge_cases.TestCompilerEdgeCases.test_ndot_unclosed_block)
+Unclosed block (missing 509) raises N204. ... ok
+test_ndot_very_long_string (test_edge_cases.TestCompilerEdgeCases.test_ndot_very_long_string)
+N-DOT literal string with 50,000 characters. ... ok
+test_ndot_wrong_function_arguments (test_edge_cases.TestCompilerEdgeCases.test_ndot_wrong_function_arguments)
+Calling an N-DOT function (512) with the wrong arity raises N208. ... ok
+test_ndot_wrong_operand_count (test_edge_cases.TestCompilerEdgeCases.test_ndot_wrong_operand_count)
+Opcode 701 (add) expects 3 operands (dest, src1, src2), got 2 (N202). ... ok
+test_plan_1000_line_program (test_edge_cases.TestCompilerEdgeCases.test_plan_1000_line_program)
+PLAN scalability test: Generates, parses, analyzes, and compiles a 1,000+ line program. ... ok
+test_plan_break_outside_loop (test_edge_cases.TestCompilerEdgeCases.test_plan_break_outside_loop)
+'Stop the loop.' outside any loop raises P305. ... ok
+test_plan_deeply_nested_blocks (test_edge_cases.TestCompilerEdgeCases.test_plan_deeply_nested_blocks)
+PLAN program with 6 levels of nested blocks. ... ok
+test_plan_empty_program_accepted (test_edge_cases.TestCompilerEdgeCases.test_plan_empty_program_accepted)
+An empty PLAN program is valid and produces an empty executable module. ... ok
+test_plan_huge_loop_execution (test_edge_cases.TestCompilerEdgeCases.test_plan_huge_loop_execution)
+PLAN repeat loop executing 10,000 iterations. ... ok
+test_plan_invalid_statement_keyword (test_edge_cases.TestCompilerEdgeCases.test_plan_invalid_statement_keyword)
+Unrecognized PLAN statements must raise a syntax error. ... ok
+test_plan_leading_zeros_numeric (test_edge_cases.TestCompilerEdgeCases.test_plan_leading_zeros_numeric)
+PLAN numeric literals with leading zeros parse cleanly as numeric values. ... ok
+test_plan_missing_period (test_edge_cases.TestCompilerEdgeCases.test_plan_missing_period)
+PLAN statements must end with a period. ... ok
+test_plan_multiple_functions_with_hoisting (test_edge_cases.TestCompilerEdgeCases.test_plan_multiple_functions_with_hoisting)
+Multiple PLAN functions with forward calling and mutual recursion. ... ok
+test_plan_return_outside_function (test_edge_cases.TestCompilerEdgeCases.test_plan_return_outside_function)
+'Return' used outside any function block raises P304. ... ok
+test_plan_undefined_variable (test_edge_cases.TestCompilerEdgeCases.test_plan_undefined_variable)
+Using an undeclared variable raises P301. ... ok
+test_plan_very_long_string (test_edge_cases.TestCompilerEdgeCases.test_plan_very_long_string)
+PLAN string literal with 50,000 characters. ... ok
+test_plan_wrong_call_arity (test_edge_cases.TestCompilerEdgeCases.test_plan_wrong_call_arity)
+Calling a PLAN function with too few/many arguments raises P308. ... ok
+test_disasm_and_asm_roundtrip (test_ndot.TestNdotToolchain.test_disasm_and_asm_roundtrip) ... ok
+test_lexer_trailing_dot_error (test_ndot.TestNdotToolchain.test_lexer_trailing_dot_error) ... ok
+test_lexer_trailing_newline_no_false_dot (test_ndot.TestNdotToolchain.test_lexer_trailing_newline_no_false_dot) ... ok
+test_lexer_valid (test_ndot.TestNdotToolchain.test_lexer_valid) ... ok
+test_runtime_permission_denied (test_ndot.TestNdotToolchain.test_runtime_permission_denied) ... ok
+test_validator_missing_version (test_ndot.TestNdotToolchain.test_validator_missing_version) ... ok
+test_validator_slot_read_before_write (test_ndot.TestNdotToolchain.test_validator_slot_read_before_write) ... ok
+test_validator_unbalanced_block (test_ndot.TestNdotToolchain.test_validator_unbalanced_block) ... ok
+test_ask_and_try_codegen (test_plan.TestPlanCompiler.test_ask_and_try_codegen) ... ok
+test_descending_range_codegen (test_plan.TestPlanCompiler.test_descending_range_codegen) ... ok
+test_lexer_basic (test_plan.TestPlanCompiler.test_lexer_basic) ... ok
+test_parser_basic (test_plan.TestPlanCompiler.test_parser_basic) ... ok
+test_semantic_redeclaration (test_plan.TestPlanCompiler.test_semantic_redeclaration) ... ok
+test_semantic_success (test_plan.TestPlanCompiler.test_semantic_success) ... ok
+test_semantic_undefined_var (test_plan.TestPlanCompiler.test_semantic_undefined_var) ... ok
+test_type_annotations_codegen (test_plan.TestPlanCompiler.test_type_annotations_codegen) ... ok
+
+----------------------------------------------------------------------
+Ran 52 tests in 0.738s
+
+OK

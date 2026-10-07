@@ -721,6 +721,8 @@ def fetch(url: str) -> str:
     with urllib.request.urlopen(url) as response:
         return response.read().decode('utf-8')
 
+fetch_url = fetch
+
 def load_registry(registry_id: int):
     # Extension registry loader stub
     pass

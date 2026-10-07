@@ -15,3 +15,6 @@ class Registry:
 
     def get_opcode(self, opcode_id: str) -> Any:
         return self.opcodes.get(opcode_id)
+
+    def get(self, opcode_id: str) -> Any:
+        return self.get_opcode(opcode_id)

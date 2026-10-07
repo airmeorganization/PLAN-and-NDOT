@@ -547,22 +547,22 @@ class Parser:
         left = self.parse_additive()
 
         # Check for comparison operators
-        if self.match_words('is', 'greater', 'than', 'or', 'equal', 'to') or self.match_words('is', 'at', 'least'):
+        if self.match_words('is', 'greater', 'than', 'or', 'equal', 'to') or self.match_words('is', 'at', 'least') or self.match_word('>='):
             right = self.parse_additive()
             return BinaryOp(line=left.line, column=left.column, left=left, op='>=', right=right)
-        elif self.match_words('is', 'less', 'than', 'or', 'equal', 'to') or self.match_words('is', 'at', 'most'):
+        elif self.match_words('is', 'less', 'than', 'or', 'equal', 'to') or self.match_words('is', 'at', 'most') or self.match_word('<='):
             right = self.parse_additive()
             return BinaryOp(line=left.line, column=left.column, left=left, op='<=', right=right)
-        elif self.match_words('is', 'greater', 'than') or self.match_words('is', 'more', 'than'):
+        elif self.match_words('is', 'greater', 'than') or self.match_words('is', 'more', 'than') or self.match_word('>'):
             right = self.parse_additive()
             return BinaryOp(line=left.line, column=left.column, left=left, op='>', right=right)
-        elif self.match_words('is', 'less', 'than') or self.match_words('is', 'fewer', 'than'):
+        elif self.match_words('is', 'less', 'than') or self.match_words('is', 'fewer', 'than') or self.match_word('<'):
             right = self.parse_additive()
             return BinaryOp(line=left.line, column=left.column, left=left, op='<', right=right)
-        elif self.match_words('is', 'not', 'equal', 'to') or self.match_words('is', 'not'):
+        elif self.match_words('is', 'not', 'equal', 'to') or self.match_words('is', 'not') or self.match_word('!='):
             right = self.parse_additive()
             return BinaryOp(line=left.line, column=left.column, left=left, op='!=', right=right)
-        elif self.match_words('is', 'equal', 'to') or self.match_word('equals') or self.match_word('is'):
+        elif self.match_words('is', 'equal', 'to') or self.match_word('equals') or self.match_word('is') or self.match_word('=='):
             # Check for "is between", "is empty", "is nothing", "is in"
             if self.match_word('between'):
                 low = self.parse_additive()
@@ -605,7 +605,7 @@ class Parser:
             if allow_times and self.match_word('times'):
                 right = self.parse_power()
                 left = BinaryOp(line=left.line, column=left.column, left=left, op='*', right=right)
-            elif self.match_words('divided', 'by'):
+            elif self.match_words('divided', 'by') or self.match_word('divided_op'):
                 right = self.parse_power()
                 left = BinaryOp(line=left.line, column=left.column, left=left, op='/', right=right)
             elif self.match_word('modulo'):
@@ -617,7 +617,7 @@ class Parser:
 
     def parse_power(self) -> Expr:
         left = self.parse_unary()
-        if self.match_words('to', 'the', 'power', 'of'):
+        if self.match_words('to', 'the', 'power', 'of') or self.match_word('power'):
             right = self.parse_power() # right-associative
             return BinaryOp(line=left.line, column=left.column, left=left, op='**', right=right)
         return left

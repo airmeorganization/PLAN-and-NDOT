@@ -2,7 +2,7 @@
   "name": "plan-and-ndot",
   "displayName": "PLAN & N-DOT Language Support",
   "description": "Language support, syntax highlighting, diagnostics, compilation, and execution for PLAN (Plain Language) and N-DOT (Neural-DOT).",
-  "version": "0.1.1",
+  "version": "0.1.2",
   "publisher": "airmeorganization",
   "repository": {
     "type": "git",
